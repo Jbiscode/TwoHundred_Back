@@ -26,7 +26,7 @@ public class SwaggerConfig {
         // 문서화할 API를 그룹화하여 관리(여러개의 그룹을 만들어서 관리 가능)
         @Bean
         public GroupedOpenApi customOpenAPI(){
-            String[] paths = {"/users/**","/admin/**"};
+            String[] paths = {"/login","/users/**","/admin/**","/api/v1/auth/**"};
             return GroupedOpenApi.builder()
                     .group("api-v1")
                     .pathsToMatch(paths)
