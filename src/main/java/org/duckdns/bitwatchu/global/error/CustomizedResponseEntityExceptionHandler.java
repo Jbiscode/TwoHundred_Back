@@ -1,6 +1,9 @@
 package org.duckdns.bitwatchu.global.error;
 
+import java.util.Date;
+
 import org.duckdns.bitwatchu.app.user.exception.UserNotFoundException;
+import org.duckdns.bitwatchu.global.auth.exception.DuplicateIdExistException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -11,7 +14,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.util.Date;
+
+
+
 @ControllerAdvice
 public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
 
@@ -29,6 +34,14 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
                 new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
 
         return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(DuplicateIdExistException.class)
+    public final ResponseEntity<Object> duplicateIdExistExceptions(Exception ex, WebRequest request) {
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.CONFLICT);
     }
 
     @Override
