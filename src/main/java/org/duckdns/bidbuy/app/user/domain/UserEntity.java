@@ -22,6 +22,8 @@ import lombok.experimental.SuperBuilder;
 @Table(name = "user")
 public class UserEntity extends BaseEntity{
 
+
+
     @Column(unique = true)
     private String username;
     private String name;
