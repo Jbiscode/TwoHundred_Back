@@ -5,6 +5,7 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 secret.yml
+keystore.p12
 
 ### STS ###
 .apt_generated
@@ -37,3 +38,4 @@ out/
 ### VS Code ###
 .vscode/
 .DS_Store
+secret.yml.base64
