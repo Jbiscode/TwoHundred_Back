@@ -1,4 +1,4 @@
-package org.duckdns.bidbuy.app.article.domain;
+package org.duckdns.bidbuy.app.offer.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.duckdns.bidbuy.app.article.domain.Article;
+import org.duckdns.bidbuy.app.user.domain.UserEntity;
 import org.duckdns.bidbuy.global.common.entity.BaseEntity;
 
 import static jakarta.persistence.FetchType.LAZY;
@@ -20,14 +21,17 @@ import static jakarta.persistence.FetchType.LAZY;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(callSuper = true)
-public class ProductImage extends BaseEntity {
+public class Offer extends BaseEntity {
 
-    private String imageUrl;
+    private boolean isSelected;
+
+    private int price;
+
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "user_id")
+    private UserEntity user;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "article_id")
     private Article article;
 }
-
-
-
