@@ -1,11 +1,19 @@
 spring:
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        use_sql_comments: true
   config:
     import: classpath:secret.yml
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://db-n8pa9-kr.vpc-pub-cdb.ntruss.com:3306/bidbuy_prod?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=Asia/Seoul
     username: study
-    password: ${mysql.prod_password}
+    password: "bitcamp!@#123"
 
 server:
   port: 443
@@ -14,3 +22,5 @@ server:
     key-store-password: bidbuy0627
     key-store-type: PKCS12
     key-alias: bidbuy
+
+    

@@ -1,4 +1,4 @@
 FROM openjdk:17-jdk-slim
 VOLUME /tmp
-COPY build/libs/your-application.jar app.jar
+COPY build/libs/bidbuy-1.0.0.jar app.jar
 ENTRYPOINT ["java","-jar","/app.jar"]
