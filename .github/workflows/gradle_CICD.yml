@@ -2,7 +2,7 @@ name: gradle_CICD.yml
 on:
   push:
     branches:
-      - main
+      - deploy
   workflow_dispatch:
 
 jobs:
@@ -12,14 +12,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: main
-
-      - run: |
-          pwd
-          ls
-          ls src/main/resources
-          cat src/main/resources/application.yml
-          ls  
+          ref: deploy
+  
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
@@ -33,12 +27,12 @@ jobs:
         run: |
           touch src/main/resources/keystore.p12
           touch src/main/resources/secret.yml
-          ls
+          
           echo ${{ secrets.SSL_KEYSTORE }} | base64 -d > src/main/resources/keystore.p12
-          ls
+          
           echo ${{ secrets.SECRET_PROD }} | base64 -d > src/main/resources/secret.yml
           echo ${{ secrets.APPLICATION_SET }} | base64 -d > src/main/resources/application.yml
-          ls
+          
           cat src/main/resources/application.yml
           cat src/main/resources/secret.yml
 
