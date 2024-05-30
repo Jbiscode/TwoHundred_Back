@@ -49,7 +49,7 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         response.addCookie(createCookie("refresh",   refreshToken, 86400000L));
 
         // CORS를 위해 노출할 헤더 설정
-        response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+        // response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
         response.setHeader("Access-Control-Allow-Origin", "https://bidbuy.duckdns.org");
         response.setHeader("Access-Control-Allow-Credentials", "true");
         response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");

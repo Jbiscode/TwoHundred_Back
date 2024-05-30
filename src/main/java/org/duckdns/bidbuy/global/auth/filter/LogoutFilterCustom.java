@@ -10,7 +10,7 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
+
 
 import org.duckdns.bidbuy.global.auth.domain.RefreshTokenRepository;
 import org.duckdns.bidbuy.global.auth.jwt.JWTUtil;
@@ -19,11 +19,16 @@ import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
 
-@RequiredArgsConstructor
+
 public class LogoutFilterCustom extends GenericFilterBean {
 
     private final JWTUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
+
+    public LogoutFilterCustom(JWTUtil jwtUtil, RefreshTokenRepository refreshTokenRepository) {
+        this.jwtUtil = jwtUtil;
+        this.refreshTokenRepository = refreshTokenRepository;
+    }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -35,7 +40,7 @@ public class LogoutFilterCustom extends GenericFilterBean {
 
         // /logout요청이 POST Method로 들어왔는지 확인
         String requestUri = request.getRequestURI();
-        if (!requestUri.matches("^\\/logout$")) {
+        if (!requestUri.matches("^\\/api\\/logout$")) {
 
             filterChain.doFilter(request, response);
             return;
