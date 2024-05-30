@@ -42,12 +42,6 @@ public class SecurityConfig {
     private final OAuth2UserService oAuth2UserService;
     private final OAuthSuccessHandler oAuthSuccessHandler;
 
-//    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil, RefreshTokenRepository refreshTokenRepository) {
-//        this.authenticationConfiguration = authenticationConfiguration;
-//        this.jwtUtil = jwtUtil;
-//        this.refreshTokenRepository = refreshTokenRepository;
-//    }
-
 
     @Bean
     AuthenticationManager authenticationManager() throws Exception {
@@ -79,9 +73,9 @@ public class SecurityConfig {
                                 .userService(oAuth2UserService))
                                 .successHandler(oAuthSuccessHandler))
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/api/login", "/","/user", "/join","/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/login" ,"/login","/","/user", "/join","/api/v1/auth/**").permitAll()
                         .requestMatchers("/admin").hasAuthority("ADMIN")  // hasRole("ADMIN") 대신 hasAuthority("ADMIN") 사용
-                        .requestMatchers("/refreshToken").permitAll()
+                        .requestMatchers("/api/refreshToken").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling((exception) -> exception
                         .authenticationEntryPoint((request, response, authException) -> response.sendError(401))
