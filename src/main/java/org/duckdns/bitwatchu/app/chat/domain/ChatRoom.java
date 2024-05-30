@@ -1,5 +1,4 @@
-package org.duckdns.bitwatchu.app.article.domain;
-
+package org.duckdns.bitwatchu.app.chat.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -10,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
+import org.duckdns.bitwatchu.app.article.domain.Article;
 import org.duckdns.bitwatchu.app.user.domain.UserEntity;
 import org.duckdns.bitwatchu.global.common.entity.BaseEntity;
 
@@ -21,7 +21,7 @@ import static jakarta.persistence.FetchType.LAZY;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(callSuper = true)
-public class LikeArticle extends BaseEntity {
+public class ChatRoom extends BaseEntity {
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "user_id")
