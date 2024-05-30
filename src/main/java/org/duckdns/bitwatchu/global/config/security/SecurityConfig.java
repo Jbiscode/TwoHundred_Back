@@ -61,7 +61,7 @@ public class SecurityConfig {
 
                     CorsConfiguration configuration = new CorsConfiguration();
 
-                    configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000","https://nid.naver.com"));
+                    configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000","https://bidbuy.duckdns.org"));
                     configuration.setAllowedMethods(Collections.singletonList("*"));
                     configuration.setAllowCredentials(true);
                     configuration.setAllowedHeaders(Collections.singletonList("*"));

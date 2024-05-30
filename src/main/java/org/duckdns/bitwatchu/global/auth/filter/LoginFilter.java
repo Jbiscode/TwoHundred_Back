@@ -94,7 +94,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         // // 로컬 스토리지에 Authorization 저장
         // response.setHeader("Set-Cookie", "Authorization=Bearer " + access + "; path=/; max-age=600; HttpOnly");
         // refresh토큰을 헤더로 보내서 토큰으로 저장
-        response.setHeader("Set-Cookie", "refresh=" + refreshToken + "; path=/; max-age=86400; SameSite=None; Secure; HttpOnly");
+        response.setHeader("Set-Cookie", "refresh=" + refreshToken + "; path=/; max-age=86400; SameSite=None;  HttpOnly");
         // response.addCookie(createCookie("refresh", refreshToken));
         ApiResponse<String> apiResponse = new ApiResponse<>("200", "로그인 성공", null);
         response.setStatus(HttpStatus.OK.value());

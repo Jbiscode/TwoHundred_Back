@@ -1,0 +1,16 @@
+spring:
+  config:
+    import: classpath:secret.yml
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://db-n8pa9-kr.vpc-pub-cdb.ntruss.com:3306/bidbuy_prod?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=Asia/Seoul
+    username: study
+    password: ${mysql.prod_password}
+
+server:
+  port: 443
+  ssl:
+    key-store: classpath:keystore.p12
+    key-store-password: bidbuy0627
+    key-store-type: PKCS12
+    key-alias: bidbuy
