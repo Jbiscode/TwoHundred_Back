@@ -1,9 +1,8 @@
 package org.duckdns.bidbuy.global.auth.domain;
 
+import jakarta.persistence.*;
 import org.duckdns.bidbuy.global.common.entity.BaseEntity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,6 +17,9 @@ import lombok.experimental.SuperBuilder;
 @ToString(callSuper = true)
 @Table(name = "refresh_token")
 public class RefreshTokenEntity extends BaseEntity{
+
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private String username;
     private String refreshToken;

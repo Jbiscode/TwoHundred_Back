@@ -20,9 +20,12 @@ public class AuthService {
 
   public UserEntity createUser(SignupRequest userDTO) {
     Optional<UserEntity> isExist = userRepository.findByUsername(userDTO.getUsername());
+
     if (isExist.isPresent()) {
       throw new DuplicateIdExistException("이미 존재하는 사용자입니다.");
     }
+
+
     UserEntity user = UserEntity.builder()
                                       .username(userDTO.getUsername())
                                       .password(bCryptPasswordEncoder.encode(userDTO.getPassword()))

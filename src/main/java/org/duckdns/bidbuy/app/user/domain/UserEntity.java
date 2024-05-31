@@ -1,12 +1,10 @@
 package org.duckdns.bidbuy.app.user.domain;
 
+import jakarta.persistence.*;
 import org.duckdns.bidbuy.global.common.entity.BaseEntity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,9 +17,11 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(callSuper = true)
-@Table(name = "user")
+@Table(name = "users")
 public class UserEntity extends BaseEntity{
 
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
 
 
     @Column(unique = true)

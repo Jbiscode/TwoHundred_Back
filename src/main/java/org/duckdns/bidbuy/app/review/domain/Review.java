@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.duckdns.bidbuy.app.article.domain.Article;
+import org.duckdns.bidbuy.app.user.domain.User;
 import org.duckdns.bidbuy.app.user.domain.UserEntity;
 import org.duckdns.bidbuy.global.common.entity.BaseEntity;
 
@@ -18,21 +19,31 @@ import static jakarta.persistence.FetchType.LAZY;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(callSuper = true)
+@Table(name = "review")
 public class Review extends BaseEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "review_id")
+    private Long id;
 
     private String content;
 
     private boolean isRevieweeBuyer;
 
-    private int score;
+    private Integer score;
 
     @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "user_id")
-    private UserEntity reviewer;
+    @JoinColumn(name = "reviewer_id")
+    private User reviewer;
+
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "reviewee_id")
+    private User reviewee;
 
     @OneToOne(fetch = LAZY)
     @JoinColumn(name = "article_id")
     private Article article;
 
-    /* from_article 어떻게 해야할지 ? */
+
 }

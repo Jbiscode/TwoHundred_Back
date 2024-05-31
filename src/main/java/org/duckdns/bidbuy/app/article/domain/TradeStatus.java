@@ -2,5 +2,5 @@ package org.duckdns.bidbuy.app.article.domain;
 
 public enum TradeStatus {
 
-   SALE ,RESERVED ,COMPLETE
+   ON_SALE ,RESERVED , SOLD_OUT
 }
