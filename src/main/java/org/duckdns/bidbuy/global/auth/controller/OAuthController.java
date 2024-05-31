@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping("/api/v1/oauth")
+@RequestMapping("/api/v1/oauth2")
 public class OAuthController {
 
   @GetMapping("/redirect/naver")
