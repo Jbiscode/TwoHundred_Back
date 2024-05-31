@@ -1,9 +1,11 @@
 package org.duckdns.bidbuy.global.auth.controller;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.net.URI;
 import java.security.SecureRandom;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -22,7 +24,7 @@ public class OAuthController {
   private String naverRedirectUri;
 
   @GetMapping("/redirect/naver")
-  public ResponseEntity<Void> redirectNaver() {
+  public void redirectNaver(HttpServletResponse response) throws IOException {
     String clientId = naverClientId;
     String redirectURI = naverRedirectUri;
     SecureRandom random = new SecureRandom();
@@ -33,9 +35,7 @@ public class OAuthController {
             clientId, redirectURI, state
     );
 
-    HttpHeaders headers = new HttpHeaders();
-    headers.setLocation(URI.create(naverAuthUrl));
-    return new ResponseEntity<>(headers, HttpStatus.FOUND);
+    response.sendRedirect(naverAuthUrl);
   }
 
   @GetMapping("/redirect/kakao")
