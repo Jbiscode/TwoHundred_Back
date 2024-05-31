@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
+import lombok.extern.slf4j.Slf4j;
 import org.duckdns.bidbuy.global.auth.domain.RefreshTokenEntity;
 import org.duckdns.bidbuy.global.auth.domain.RefreshTokenRepository;
 import org.duckdns.bidbuy.global.auth.jwt.JWTUtil;
@@ -19,6 +20,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
@@ -55,7 +57,8 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         response.setHeader("Access-Control-Allow-Headers", "Authorization, refresh, Content-Type");
         response.setHeader("Access-Control-Expose-Headers", "Authorization, refresh");
-        response.sendRedirect("https://bidbuy.duckdns.org/");
+        log.info("Oauth 로그인 성공");
+        response.sendRedirect("https://bidbuy.duckdns.org");
     }
 
     private Cookie createCookie(String key, String value, Long expiredMs) {
