@@ -55,7 +55,7 @@ public class SecurityConfig {
 
                     CorsConfiguration configuration = new CorsConfiguration();
 
-                    configuration.setAllowedOrigins(Arrays.asList("http://localhost:8080","http://localhost:3000","https://bidbuy.duckdns.org"));
+                    configuration.setAllowedOrigins(Arrays.asList("https://bidbuy.duckdns.org","https://api-bidbuy.duckdns.org:5000","http://localhost:3000", "http://localhost:5000"));
                     configuration.setAllowedMethods(Collections.singletonList("*"));
                     configuration.setAllowCredentials(true);
                     configuration.setAllowedHeaders(Collections.singletonList("*"));
