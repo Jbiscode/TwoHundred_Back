@@ -17,21 +17,21 @@ public class OAuthController {
   @GetMapping("/redirect/naver")
   public ResponseEntity<Void> redirectNaver() {
     HttpHeaders headers = new HttpHeaders();
-    headers.setLocation(URI.create("/oauth2/authorization/naver"));
+    headers.setLocation(URI.create("https://api-bidbuy.duckdns.org/oauth2/authorization/naver"));
     return new ResponseEntity<>(headers, HttpStatus.FOUND);
   }
 
   @GetMapping("/redirect/kakao")
   public ResponseEntity<Void> redirectKakao() {
     HttpHeaders headers = new HttpHeaders();
-    headers.setLocation(URI.create("/oauth2/authorization/kakao"));
+    headers.setLocation(URI.create("https://api-bidbuy.duckdns.org/oauth2/authorization/kakao"));
     return new ResponseEntity<>(headers, HttpStatus.FOUND);
   }
 
   @GetMapping("/redirect/google")
   public ResponseEntity<Void> redirectGoogle() {
     HttpHeaders headers = new HttpHeaders();
-    headers.setLocation(URI.create("/oauth2/authorization/google"));
+    headers.setLocation(URI.create("https://api-bidbuy.duckdns.org/oauth2/authorization/google"));
     return new ResponseEntity<>(headers, HttpStatus.FOUND);
   }
 }
