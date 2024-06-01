@@ -50,7 +50,7 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 //        response.addCookie(createCookie("Authorization",   token, 60 * 1000L)); // 일단 1분
 //        response.addCookie(createCookie("refresh",   refreshToken, 86400000L));
         response.setHeader("Authorization", "Bearer " +token);
-        response.setHeader("Set-Cookie", "refresh="+refreshToken+"; SameSite=None; Secure; HttpOnly; Path=/; Max-Age=86400");
+        response.setHeader("Set-Cookie", "refreshi="+refreshToken+"; SameSite=None; Secure; HttpOnly; Path=/; Max-Age=86400");
         // CORS를 위해 노출할 헤더 설정
         response.setHeader("Access-Control-Allow-Origin", "https://bidbuy.duckdns.org");
         response.setHeader("Access-Control-Allow-Credentials", "true");
