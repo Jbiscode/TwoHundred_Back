@@ -26,6 +26,8 @@ public class OAuthController {
   @GetMapping("/redirect/naver")
   public ResponseEntity<Void> redirectNaver() {
     HttpHeaders headers = new HttpHeaders();
+    headers.setAccessControlAllowOrigin("https://bidbuy.duckdns.org");
+    headers.setAccessControlAllowCredentials(true);
     headers.setLocation(URI.create("https://api-bidbuy.duckdns.org/oauth2/authorization/naver"));
     return new ResponseEntity<>(headers, HttpStatus.FOUND);
 }
