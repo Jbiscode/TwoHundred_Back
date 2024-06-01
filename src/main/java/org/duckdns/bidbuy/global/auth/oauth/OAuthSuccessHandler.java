@@ -47,8 +47,8 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         addRefreshTokenEntity(username, refreshToken, 86400000L);
 
         // 토큰을 쿠키에 추가
-        response.addCookie(createCookie("Authorization",   token, 60 * 1000L)); // 일단 1분
-        response.addCookie(createCookie("refresh",   refreshToken, 86400000L));
+//        response.addCookie(createCookie("Authorization",   token, 60 * 1000L)); // 일단 1분
+//        response.addCookie(createCookie("refresh",   refreshToken, 86400000L));
         response.setHeader("Authorization", "Bearer " +token);
         response.setHeader("Set-Cookie", "refresh="+refreshToken+"; SameSite=None; Secure; HttpOnly; Path=/; Max-Age=86400");
         // CORS를 위해 노출할 헤더 설정
