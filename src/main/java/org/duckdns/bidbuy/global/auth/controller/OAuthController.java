@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.net.URI;
 import java.security.SecureRandom;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -24,13 +25,21 @@ public class OAuthController {
   private String naverRedirectUri;
 
   @GetMapping("/redirect/naver")
-  public ResponseEntity<Void> redirectNaver() {
-    HttpHeaders headers = new HttpHeaders();
-    headers.setAccessControlAllowOrigin("https://bidbuy.duckdns.org");
-    headers.setAccessControlAllowCredentials(true);
-    headers.setLocation(URI.create("https://api-bidbuy.duckdns.org/oauth2/authorization/naver"));
-    return new ResponseEntity<>(headers, HttpStatus.FOUND);
-}
+  public void redirectNaver(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    String redirectUrl = "https://api-bidbuy.duckdns.org/oauth2/authorization/naver";
+
+    // CORS 헤더 설정
+    response.setHeader("Access-Control-Allow-Origin", "https://bidbuy.duckdns.org");
+    response.setHeader("Access-Control-Allow-Credentials", "true");
+
+    // 기존 요청 파라미터 추가
+    String queryString = request.getQueryString();
+    if (queryString != null) {
+      redirectUrl += "?" + queryString;
+    }
+
+    response.sendRedirect(redirectUrl);
+  }
 
   @GetMapping("/redirect/kakao")
   public ResponseEntity<Void> redirectKakao() {
