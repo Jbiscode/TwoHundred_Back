@@ -1,15 +1,13 @@
 package org.duckdns.bidbuy.app.offer.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.duckdns.bidbuy.app.article.domain.Article;
+import org.duckdns.bidbuy.app.user.domain.User;
 import org.duckdns.bidbuy.app.user.domain.UserEntity;
 import org.duckdns.bidbuy.global.common.entity.BaseEntity;
 
@@ -21,17 +19,23 @@ import static jakarta.persistence.FetchType.LAZY;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(callSuper = true)
+@Table(name ="offer")
 public class Offer extends BaseEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "offer_id")
+    private Long id;
 
     private boolean isSelected;
 
-    private int price;
+    private Integer price;
 
-    @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "user_id")
-    private UserEntity user;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "offerer_id")
+    private User offerer;
 
-    @ManyToOne(fetch = LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "article_id")
     private Article article;
 }

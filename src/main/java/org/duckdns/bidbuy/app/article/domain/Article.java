@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.duckdns.bidbuy.app.offer.domain.Offer;
+import org.duckdns.bidbuy.app.review.domain.Review;
+import org.duckdns.bidbuy.app.user.domain.User;
 import org.duckdns.bidbuy.app.user.domain.UserEntity;
 import org.duckdns.bidbuy.global.common.entity.BaseEntity;
 
@@ -25,37 +27,41 @@ import static jakarta.persistence.FetchType.LAZY;
 @Table(name = "article")
 public class Article extends BaseEntity {
 
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "article_id")
+    private Long id;
+
+    @Enumerated(EnumType.STRING)
+    private Category category;
 
     private String title;
-
     private String content;
+    private Integer price;
+    private Integer quantity;
+    private Long likeCount;
+    private Long viewCount;
 
-    private int likeCount;
 
-    private String mainImageUrl;
+    @Enumerated(EnumType.STRING)
+    private TradeMethod tradeMethod;
 
-    private String thumbImageUrl;
-
-    private int price;
-
-    private int quantity;
-
-    private String address1;
-
-    private String address2;
-
-    private TradeMethodStatus tradeMethodStatus;
-
+    @Enumerated(EnumType.STRING)
     private TradeStatus tradeStatus;
 
-    private int viewCount;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "writer_id")
+    private User writer;
+
+    @OneToMany(mappedBy = "article")
+    private List<ProductImage> productImages = new ArrayList<>();
 
     @OneToMany(mappedBy = "article")
     private List<Offer> offers = new ArrayList<>();
 
-    @ManyToOne(fetch = LAZY)
-    @JoinColumn(name ="user_id")
-    private UserEntity writer;
+    @OneToOne(mappedBy = "article")
+    private Review review;
 
+    @OneToMany(mappedBy = "article")
+    private List<LikeArticle> likes = new ArrayList<>();
 
 }
