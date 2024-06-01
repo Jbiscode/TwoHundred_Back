@@ -24,19 +24,11 @@ public class OAuthController {
   private String naverRedirectUri;
 
   @GetMapping("/redirect/naver")
-  public void redirectNaver(HttpServletResponse response) throws IOException {
-    String clientId = naverClientId;
-    String redirectURI = naverRedirectUri;
-    SecureRandom random = new SecureRandom();
-    String state = new BigInteger(130, random).toString(32);
-
-    String naverAuthUrl = String.format(
-            "https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=%s&redirect_uri=%s&state=%s",
-            clientId, redirectURI, state
-    );
-
-    response.sendRedirect(naverAuthUrl);
-  }
+  public ResponseEntity<Void> redirectNaver() {
+    HttpHeaders headers = new HttpHeaders();
+    headers.setLocation(URI.create("https://api-bidbuy.duckdns.org/oauth2/authorization/naver"));
+    return new ResponseEntity<>(headers, HttpStatus.FOUND);
+}
 
   @GetMapping("/redirect/kakao")
   public ResponseEntity<Void> redirectKakao() {
