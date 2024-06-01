@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
+import lombok.extern.slf4j.Slf4j;
 import org.duckdns.bidbuy.global.auth.domain.RefreshTokenEntity;
 import org.duckdns.bidbuy.global.auth.domain.RefreshTokenRepository;
 import org.duckdns.bidbuy.global.auth.jwt.JWTUtil;
@@ -19,6 +20,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
@@ -45,18 +47,18 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         addRefreshTokenEntity(username, refreshToken, 86400000L);
 
         // 토큰을 쿠키에 추가
-        response.addCookie(createCookie("Authorization",   token, 60 * 1000L)); // 일단 1분
-        response.addCookie(createCookie("refresh",   refreshToken, 86400000L));
+//        response.addCookie(createCookie("Authorization",   token, 60 * 1000L)); // 일단 1분
+//        response.addCookie(createCookie("refresh",   refreshToken, 86400000L));
         response.setHeader("Authorization", "Bearer " +token);
         response.setHeader("Set-Cookie", "refresh="+refreshToken+"; SameSite=None; Secure; HttpOnly; Path=/; Max-Age=86400");
         // CORS를 위해 노출할 헤더 설정
-        // response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
         response.setHeader("Access-Control-Allow-Origin", "https://bidbuy.duckdns.org");
         response.setHeader("Access-Control-Allow-Credentials", "true");
         response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-        response.setHeader("Access-Control-Allow-Headers", "Authorization, refresh, Content-Type");
+        response.setHeader("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization, Set-Cookie, refresh");
         response.setHeader("Access-Control-Expose-Headers", "Authorization, refresh");
-        response.sendRedirect("https://bidbuy.duckdns.org/");
+        log.info("Oauth 로그인 성공");
+        response.sendRedirect("https://bidbuy.duckdns.org");
     }
 
     private Cookie createCookie(String key, String value, Long expiredMs) {
