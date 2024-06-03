@@ -1,5 +1,6 @@
 package org.duckdns.bidbuy.global.auth.domain;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -19,7 +20,8 @@ import lombok.ToString;
 @ToString
 public class LoginRequest {
     @NotBlank
-    private String username;
+    @Email
+    private String email;
 
     @NotBlank
     @Size(min = 8, max = 20)

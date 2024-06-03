@@ -2,7 +2,7 @@ package org.duckdns.bidbuy.global.auth.service;
 
 import java.util.Optional;
 
-import org.duckdns.bidbuy.app.user.domain.UserEntity;
+import org.duckdns.bidbuy.app.user.domain.User;
 import org.duckdns.bidbuy.app.user.repository.UserRepository;
 import org.duckdns.bidbuy.global.auth.domain.LoginResponse;
 import org.duckdns.bidbuy.global.auth.oauth.GoogleResponse;
@@ -10,6 +10,7 @@ import org.duckdns.bidbuy.global.auth.oauth.KakaoResponse;
 import org.duckdns.bidbuy.global.auth.oauth.NaverResponse;
 import org.duckdns.bidbuy.global.auth.oauth.OAuth2Response;
 import org.duckdns.bidbuy.global.auth.oauth.OAuth2UserCustom;
+import org.duckdns.bidbuy.app.user.domain.UserRole;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -44,29 +45,29 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
         }
         
         String username = oAuth2Response.getProvider()+" "+oAuth2Response.getProviderId();
-        Optional<UserEntity> existData = userRepository.findByUsername(username);
+        Optional<User> existData = userRepository.findByUsername(username);
 
         if (existData.isEmpty()) {
 
-            UserEntity userEntity =  UserEntity.builder()
+            User user =  User.builder()
                                                   .username(username)
                                                   .email(oAuth2Response.getEmail())
                                                   .name(oAuth2Response.getName())
-                                                  .role("USER")
+                                                  .role(UserRole.USER)
                                                   .build();
 
-            userRepository.save(userEntity);
+            userRepository.save(user);
 
-            LoginResponse userDTO = new LoginResponse("USER", username, oAuth2Response.getName(), oAuth2Response.getEmail());
+            LoginResponse userDTO = new LoginResponse(user.getId(), user.getRole(), username, oAuth2Response.getName(), oAuth2Response.getEmail());
 
             return new OAuth2UserCustom(userDTO);
         } else {
-            UserEntity userEntity = existData.get();
-            userEntity.update(oAuth2Response.getName(), oAuth2Response.getEmail());
+            User user = existData.get();
+            user.update(oAuth2Response.getName(), oAuth2Response.getEmail());
 
-            userRepository.save(userEntity);
+            userRepository.save(user);
 
-            LoginResponse userDTO = new LoginResponse(existData.get().getRole(), existData.get().getUsername(), oAuth2Response.getName(), oAuth2Response.getEmail());
+            LoginResponse userDTO = new LoginResponse(existData.get().getId(),existData.get().getRole(), existData.get().getUsername(), oAuth2Response.getName(), oAuth2Response.getEmail());
 
             return new OAuth2UserCustom(userDTO);
         }

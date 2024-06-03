@@ -1,6 +1,6 @@
 package org.duckdns.bidbuy.global.auth.controller;
 
-import org.duckdns.bidbuy.app.user.domain.UserEntity;
+import org.duckdns.bidbuy.app.user.domain.User;
 import org.duckdns.bidbuy.global.auth.domain.SignupRequest;
 import org.duckdns.bidbuy.global.auth.domain.SignupResponse;
 import org.duckdns.bidbuy.global.auth.service.AuthService;
@@ -24,7 +24,7 @@ public class AuthController {
 
   @PostMapping
   public ResponseEntity<ApiResponse<SignupResponse>> signup(@RequestBody SignupRequest signupRequest) {
-    UserEntity user = authService.createUser(signupRequest);
+    User user = authService.createUser(signupRequest);
 
     SignupResponse signupResponse = new SignupResponse(user.getId());
     ApiResponse<SignupResponse> response = new ApiResponse<>("201", "정상적으로 회원가입이 완료되었습니다.", signupResponse);
@@ -36,10 +36,10 @@ public class AuthController {
   }
 
 //  @PostMapping("/login")
-//  public ResponseEntity<ApiResponse<String>> login(@RequestBody LoginRequest loginRequest) {
+//  public Response<ApiResponse<String>> login(@RequestBody LoginRequest loginRequest) {
 //    String token = authService.login(loginRequest);
 //    ApiResponse<String> response = new ApiResponse<>("200", "로그인에 성공하였습니다.", token);
-//    return ResponseEntity.ok().body(response);
+//    return Response.ok().body(response);
 //  }
 
 }

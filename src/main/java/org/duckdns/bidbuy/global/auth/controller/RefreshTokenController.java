@@ -81,16 +81,17 @@ public class RefreshTokenController {
             return new ResponseEntity<>("잘못된 refresh token 입니다.", HttpStatus.BAD_REQUEST);
         }
 
+        Long userId = jwtUtil.getUserId(refreshToken);
         String username = jwtUtil.getUsername(refreshToken);
         String role = jwtUtil.getRole(refreshToken);
 
         //make new JWT
-        String newAccess = jwtUtil.createJwt("access", username, role, 60*1000L); // 일단 1분
-        String newRefreshToken = jwtUtil.createJwt("refresh", username, role, 86400000L);
+        String newAccess = jwtUtil.createJwt("access", userId, username, role, 60*60*1000L); // 일단 1시간
+        String newRefreshToken = jwtUtil.createJwt("refresh", userId, username, role, 86400000L);
 
         //Refresh 토큰 저장 DB에 기존의 Refresh 토큰 삭제 후 새 Refresh 토큰 저장
         refreshTokenRepository.deleteByRefreshToken(refreshToken);
-        addRefreshEntity(username, newRefreshToken, 86400000L);
+        addRefreshEntity(userId, username, newRefreshToken, 86400000L);
 
         //response
         response.setHeader("Authorization", "Bearer " + newAccess);
@@ -101,12 +102,13 @@ public class RefreshTokenController {
         return ResponseEntity.ok(new ApiResponse<>("200", "토큰 재발급 성공", null));
     }
 
-    private void addRefreshEntity(String username, String refresh, Long expiredMs) {
+    private void addRefreshEntity(Long userId, String username, String refresh, Long expiredMs) {
 
         Date date = new Date(System.currentTimeMillis() + expiredMs);
 
         RefreshTokenEntity refreshEntity = RefreshTokenEntity.builder()
-                .username(username)
+                .userId(userId)
+                .userName(username)
                 .refreshToken(refresh)
                 .expiration(date.toString()).build();
 
