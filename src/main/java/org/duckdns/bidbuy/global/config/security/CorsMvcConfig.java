@@ -11,9 +11,8 @@ public class CorsMvcConfig implements WebMvcConfigurer {
     public void addCorsMappings(@SuppressWarnings("null") CorsRegistry corsRegistry) {
 
         corsRegistry.addMapping("/**")
-                .exposedHeaders("Set-Cookie")
-                // .allowedOrigins("http://localhost:3000")
-                .allowedOrigins("https://bidbuy.duckdns.org")
+                .exposedHeaders("Set-Cookie, Authorization, refresh, access")
+                .allowedOrigins("https://bidbuy.duckdns.org", "https://api-bidbuy.duckdns.org:5000" ,"http://localhost:3000", "http://localhost:5000")
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowedHeaders("*")
                 .allowCredentials(true);

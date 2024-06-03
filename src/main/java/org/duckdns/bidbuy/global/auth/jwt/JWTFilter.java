@@ -9,7 +9,8 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.duckdns.bidbuy.app.user.domain.UserEntity;
+import org.duckdns.bidbuy.app.user.domain.User;
+import org.duckdns.bidbuy.app.user.domain.UserRole;
 import org.duckdns.bidbuy.global.auth.domain.CustomUserDetails;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -69,7 +70,7 @@ public class JWTFilter extends OncePerRequestFilter {
             return;
         }
 
-        // 토큰 만료 여부 확인, 만료시 다음 필터로 넘기지 않음 // 여기는 CustomizedResponseEntityExceptionHandler 가 접근하기 전이라 직접 처리해야함
+        // 토큰 만료 여부 확인, 만료시 다음 필터로 넘기지 않음 // 여기는 CustomizedResponseExceptionHandler 가 접근하기 전이라 직접 처리해야함
         try {
             if (refreshToken.isEmpty()) {
                 jwtUtil.isExpired(accessToken);
@@ -129,16 +130,18 @@ public class JWTFilter extends OncePerRequestFilter {
             }
 
 
-            // username, role 값을 획득
+            // userid, username, role 값을 획득
+            Long userId = jwtUtil.getUserId(accessToken);
             String username = jwtUtil.getUsername(accessToken);
             String role = jwtUtil.getRole(accessToken);
 
-            UserEntity userEntity = UserEntity.builder()
+            User user = User.builder()
+                    .id(userId)
                     .username(username)
-                    .role(role)
+                    .role(UserRole.valueOf(role))
                     .build();
 
-            CustomUserDetails customUserDetails = new CustomUserDetails(userEntity);
+            CustomUserDetails customUserDetails = new CustomUserDetails(user);
 
             Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authToken);

@@ -55,7 +55,7 @@ public class SecurityConfig {
 
                     CorsConfiguration configuration = new CorsConfiguration();
 
-                    configuration.setAllowedOrigins(Arrays.asList("http://localhost:8080","http://localhost:3000","https://bidbuy.duckdns.org"));
+                    configuration.setAllowedOrigins(Arrays.asList("https://bidbuy.duckdns.org","https://api-bidbuy.duckdns.org:5000","http://localhost:3000", "http://localhost:5000"));
                     configuration.setAllowedMethods(Collections.singletonList("*"));
                     configuration.setAllowCredentials(true);
                     configuration.setAllowedHeaders(Collections.singletonList("*"));
@@ -73,7 +73,7 @@ public class SecurityConfig {
                                 .userService(oAuth2UserService))
                                 .successHandler(oAuthSuccessHandler))
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/api/login" ,"/login","/","/user", "/join","/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/login","/api/v1/oauth2/redirect/**" ,"/login/oauth2/code/**","/login","/","/user", "/join","/api/v1/auth/**").permitAll()
                         .requestMatchers("/admin").hasAuthority("ADMIN")  // hasRole("ADMIN") 대신 hasAuthority("ADMIN") 사용
                         .requestMatchers("/api/refreshToken").permitAll()
                         .anyRequest().authenticated())

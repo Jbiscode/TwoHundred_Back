@@ -1,6 +1,7 @@
 package org.duckdns.bidbuy.global.auth.domain;
 
-import org.duckdns.bidbuy.app.user.domain.UserEntity;
+import lombok.Getter;
+import org.duckdns.bidbuy.app.user.domain.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -9,29 +10,29 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 
-
+@Getter
 public class CustomUserDetails  implements UserDetails {
 
-    private final UserEntity userEntity;
-    
-    public CustomUserDetails(UserEntity userEntity) {
-        this.userEntity = userEntity;
+    private final User user;
+
+    public CustomUserDetails(User user) {
+        this.user = user;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> collection = new ArrayList<>();
-        collection.add((GrantedAuthority) userEntity::getRole);
+        collection.add((GrantedAuthority) () -> user.getRole().name());
         return collection;
     }
     @Override
     public String getUsername() {
-        return userEntity.getUsername();
+        return user.getUsername();
     }
 
     @Override
     public String getPassword() {
-        return userEntity.getPassword();
+        return user.getPassword();
     }
 
     @Override

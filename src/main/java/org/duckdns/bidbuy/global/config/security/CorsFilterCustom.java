@@ -20,8 +20,10 @@ public class CorsFilterCustom implements Filter {
             throws IOException, ServletException, java.io.IOException {
         HttpServletResponse response = (HttpServletResponse) res;
         HttpServletRequest request = (HttpServletRequest) req;
-        // response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
-        response.setHeader("Access-Control-Allow-Origin", "https://bidbuy.duckdns.org");
+        String origin = request.getHeader("Origin");
+        if (origin != null && (origin.equals("https://bidbuy.duckdns.org") || origin.equals("https://api-bidbuy.duckdns.org:5000") || origin.equals("http://localhost:3000") || origin.equals("http://localhost:5000"))) {
+            response.setHeader("Access-Control-Allow-Origin", origin);
+        }
         response.setHeader("Access-Control-Allow-Credentials", "true");
         response.setHeader("Access-Control-Allow-Methods","*");
         response.setHeader("Access-Control-Max-Age", "3600");

@@ -8,7 +8,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
+import org.duckdns.bidbuy.app.user.domain.User;
+import org.duckdns.bidbuy.global.auth.domain.CustomUserDetails;
 import org.duckdns.bidbuy.global.auth.domain.LoginRequest;
+import org.duckdns.bidbuy.global.auth.domain.LoginResponse;
 import org.duckdns.bidbuy.global.auth.domain.RefreshTokenEntity;
 import org.duckdns.bidbuy.global.auth.domain.RefreshTokenRepository;
 import org.duckdns.bidbuy.global.auth.jwt.JWTUtil;
@@ -19,16 +22,13 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
 
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.util.StreamUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 
 @Slf4j
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
@@ -59,12 +59,12 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             throw new RuntimeException(e);
         }
 
-        String username = loginRequest.getUsername();
+        String email = loginRequest.getEmail();
         String password = loginRequest.getPassword();
 
-        log.info("username: {}" , username);
+        log.info("email: {}" , email);
 
-        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password);
+        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(email, password);
 
         return authenticationManager.authenticate(authToken);
     }
@@ -73,19 +73,19 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException {
 
         //유저 정보
-        String username = authentication.getName();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User user = userDetails.getUser();
+        Long userId = user.getId();
+        String role = authentication.getAuthorities().iterator().next().getAuthority();
+        String username = user.getUsername();
 
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
-        GrantedAuthority auth = iterator.next();
-        String role = auth.getAuthority();
 
         //토큰 생성
-        String access = jwtUtil.createJwt("access", username, role, 60*60*1000L);
-        String refreshToken = jwtUtil.createJwt("refresh", username, role, 86400000L);
+        String access = jwtUtil.createJwt("access",userId, username, role, 60*60*1000L);
+        String refreshToken = jwtUtil.createJwt("refresh",userId, username, role, 86400000L);
 
         //Refresh 토큰 저장
-        addRefreshTokenEntity(username, refreshToken, 86400000L);
+        addRefreshTokenEntity(userId, username, refreshToken, 86400000L);
 
         //응답 설정
 //        response.setHeader("Access-Control-Expose-Headers", "Authorization, refresh, access, Set-Cookie");
@@ -95,7 +95,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         // refresh토큰을 헤더로 보내서 토큰으로 저장
         response.setHeader("Set-Cookie", "refresh=" + refreshToken + "; path=/; max-age=86400; SameSite=None; Secure; HttpOnly");
         // response.addCookie(createCookie("refresh", refreshToken));
-        ApiResponse<String> apiResponse = new ApiResponse<>("200", "로그인 성공", null);
+        ApiResponse<LoginResponse> apiResponse = new ApiResponse<>("200", "로그인 성공", new LoginResponse(userId, user.getRole(), username, user.getName(), user.getEmail()));
         response.setStatus(HttpStatus.OK.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.getWriter().write(new ObjectMapper().writeValueAsString(apiResponse));
@@ -111,12 +111,13 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.getWriter().write(new ObjectMapper().writeValueAsString(apiResponse));
     }
 
-    private void addRefreshTokenEntity(String username, String refreshToken, Long expiredMs) {
+    private void addRefreshTokenEntity(Long userId,String username, String refreshToken, Long expiredMs) {
 
         Date date = new Date(System.currentTimeMillis() + expiredMs);
 
         RefreshTokenEntity refreshTokenEntity = RefreshTokenEntity.builder()
-                                                            .username(username)
+                                                            .id(userId)
+                                                            .userName(username)
                                                             .refreshToken(refreshToken)
                                                             .expiration(date.toString())
                                                             .build();

@@ -1,5 +1,6 @@
 package org.duckdns.bidbuy.app.user.controller;
 
+import org.duckdns.bidbuy.app.user.domain.UserRole;
 import org.duckdns.bidbuy.global.auth.domain.LoginResponse;
 import org.duckdns.bidbuy.global.common.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +17,7 @@ public class AdminController {
 
   @GetMapping("/user")
   public ResponseEntity<ApiResponse<LoginResponse>> user() {
-    return ResponseEntity.ok(new ApiResponse<>("200", "success", new LoginResponse("USER", "username", "name", "email")));
+    return ResponseEntity.ok(new ApiResponse<>("200", "success", new LoginResponse(1L, UserRole.USER,"username", "name", "email")));
   }
 
   @GetMapping("/manager")
