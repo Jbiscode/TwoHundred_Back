@@ -13,5 +13,4 @@ public class UserRepositoryn {
 
     public void save(UserEntity user){ em.persist(user);}
 
-    public UserEntity findById(long id){ return em.find(UserEntity.class, id);}
 }
