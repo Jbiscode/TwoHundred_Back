@@ -33,6 +33,7 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         OAuth2UserCustom customUserDetails = (OAuth2UserCustom) authentication.getPrincipal();
 
         String username = customUserDetails.getUsername();
+        Long userId = customUserDetails.getUserId();
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
@@ -40,11 +41,11 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         String role = auth.getAuthority();
 
 //        String token = jwtUtil.createJwt("access", username, role, 60 * 60 * 60 * 60L);
-        String token = jwtUtil.createJwt("access", username, role, 60 * 60 * 1000L); // 일단 1시간
-        String refreshToken = jwtUtil.createJwt("refresh", username, role, 86400000L);
+        String token = jwtUtil.createJwt("access", userId, username, role, 60 * 60 * 1000L); // 일단 1시간
+        String refreshToken = jwtUtil.createJwt("refresh", userId, username, role, 86400000L);
 
         //Refresh 토큰 저장
-        addRefreshTokenEntity(username, refreshToken, 86400000L);
+        addRefreshTokenEntity(userId, username, refreshToken, 86400000L);
 
         // 토큰을 쿠키에 추가
 //        response.addCookie(createCookie("Authorization",   token, 60 * 1000L)); // 일단 1분
@@ -72,12 +73,13 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         return cookie;
     }
 
-    private void addRefreshTokenEntity(String username, String refreshToken, Long expiredMs) {
+    private void addRefreshTokenEntity(Long userId, String username, String refreshToken, Long expiredMs) {
 
         Date date = new Date(System.currentTimeMillis() + expiredMs);
 
         RefreshTokenEntity refreshTokenEntity = RefreshTokenEntity.builder()
-                .username(username)
+                .userId(userId)
+                .userName(username)
                 .refreshToken(refreshToken)
                 .expiration(date.toString())
                 .build();

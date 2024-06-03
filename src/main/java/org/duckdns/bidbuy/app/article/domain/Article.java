@@ -10,13 +10,11 @@ import lombok.experimental.SuperBuilder;
 import org.duckdns.bidbuy.app.offer.domain.Offer;
 import org.duckdns.bidbuy.app.review.domain.Review;
 import org.duckdns.bidbuy.app.user.domain.User;
-import org.duckdns.bidbuy.app.user.domain.UserEntity;
 import org.duckdns.bidbuy.global.common.entity.BaseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static jakarta.persistence.FetchType.LAZY;
 
 @Entity
 @SuperBuilder

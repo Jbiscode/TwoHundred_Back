@@ -3,7 +3,8 @@ package org.duckdns.bidbuy.global.auth.service;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import org.duckdns.bidbuy.app.user.domain.UserEntity;
+import org.duckdns.bidbuy.app.user.domain.User;
+import org.duckdns.bidbuy.app.user.domain.UserRole;
 import org.duckdns.bidbuy.app.user.repository.UserRepository;
 import org.duckdns.bidbuy.global.auth.domain.SignupRequest;
 import org.duckdns.bidbuy.global.auth.exception.DuplicateIdExistException;
@@ -18,18 +19,18 @@ public class AuthService {
   private final UserRepository userRepository;
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-  public UserEntity createUser(SignupRequest userDTO) {
-    Optional<UserEntity> isExist = userRepository.findByUsername(userDTO.getUsername());
+  public User createUser(SignupRequest userDTO) {
+    Optional<User> isExist = userRepository.findByEmail(userDTO.getEmail());
 
     if (isExist.isPresent()) {
       throw new DuplicateIdExistException("이미 존재하는 사용자입니다.");
     }
 
 
-    UserEntity user = UserEntity.builder()
+    User user = User.builder()
                                       .username(userDTO.getUsername())
                                       .password(bCryptPasswordEncoder.encode(userDTO.getPassword()))
-                                      .role("USER")
+                                      .role(UserRole.valueOf("USER"))
                                       .createdDate(LocalDateTime.now())
                                       .modifiedDate(LocalDateTime.now())
                                       .build();

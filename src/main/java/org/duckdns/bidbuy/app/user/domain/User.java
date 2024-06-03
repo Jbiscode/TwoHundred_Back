@@ -56,4 +56,10 @@ public class User extends BaseEntity {
 
     @OneToMany(mappedBy = "user")
     private List<LikeArticle> likedArticles = new ArrayList<>();
+
+
+    public void update(String name, String email) {
+        this.name = name;
+        this.email = email;
+    }
 }
