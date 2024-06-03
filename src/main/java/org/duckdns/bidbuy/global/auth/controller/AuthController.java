@@ -1,5 +1,6 @@
 package org.duckdns.bidbuy.global.auth.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import org.duckdns.bidbuy.app.user.domain.User;
 import org.duckdns.bidbuy.global.auth.domain.SignupRequest;
 import org.duckdns.bidbuy.global.auth.domain.SignupResponse;
@@ -20,6 +21,7 @@ public class AuthController {
 
   private final AuthService authService;
 
+  @Operation(summary = "사용자 회원가입 API", description = "사용자의 정보를 입력해서 회원가입.")
   @PostMapping
   public ResponseEntity<ApiResponse<SignupResponse>> createUser(@RequestBody SignupRequest signupRequest) {
     User user = authService.createUser(signupRequest);

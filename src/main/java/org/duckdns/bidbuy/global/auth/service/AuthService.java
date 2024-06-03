@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.duckdns.bidbuy.app.user.domain.User;
 import org.duckdns.bidbuy.app.user.domain.UserRole;
+import org.duckdns.bidbuy.app.user.exception.PasswordLengthException;
 import org.duckdns.bidbuy.app.user.repository.UserRepository;
 import org.duckdns.bidbuy.global.auth.domain.SignupRequest;
 import org.duckdns.bidbuy.global.auth.exception.DuplicateIdExistException;
@@ -26,8 +27,16 @@ public class AuthService {
     if (isExist.isPresent()) {
       throw new DuplicateIdExistException("이미 존재하는 사용자입니다.");
     }
-    if (userDTO.getEmail() == null || userDTO.getEmail().isEmpty()) {
-      throw new NullInputException("이메일을 입력해주세요.");
+    if (userDTO.getEmail() == null || userDTO.getEmail().isEmpty()
+            || userDTO.getPassword() == null || userDTO.getPassword().isEmpty()
+            || userDTO.getUsername() == null || userDTO.getUsername().isEmpty()
+            || userDTO.getAddr1() == null || userDTO.getAddr1().isEmpty()
+            || userDTO.getAddr2() == null || userDTO.getAddr2().isEmpty()) {
+      throw new NullInputException("입력값을 확인해주세요.");
+    }
+
+    if(userDTO.getPassword().length() < 8) {
+      throw new PasswordLengthException("비밀번호의 길이가 짧습니다.");
     }
 
 

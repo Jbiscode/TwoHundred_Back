@@ -14,8 +14,8 @@ import lombok.RequiredArgsConstructor;
 
 @OpenAPIDefinition(
         info = @Info(
-                title = "bitwatchu API",
-                description = "bitwatchu API 문서&명세서 입니다.",
+                title = "BidBuy API",
+                description = "BidBuy API 문서&명세서 입니다.",
                 version = "1.0.0"
         )
 )
@@ -26,9 +26,18 @@ public class SwaggerConfig {
         // 문서화할 API를 그룹화하여 관리(여러개의 그룹을 만들어서 관리 가능)
         @Bean
         public GroupedOpenApi customOpenAPI(){
-            String[] paths = {"/login","/users/**","/admin/**","/api/v1/auth/**"};
+            String[] paths = {"/api/v1/**"};
             return GroupedOpenApi.builder()
                     .group("api-v1")
+                    .pathsToMatch(paths)
+                    .build();
+        }
+
+        @Bean
+        public GroupedOpenApi customOpenAPI2(){
+            String[] paths = {"/admin/**"};
+            return GroupedOpenApi.builder()
+                    .group("admin-v1")
                     .pathsToMatch(paths)
                     .build();
         }
