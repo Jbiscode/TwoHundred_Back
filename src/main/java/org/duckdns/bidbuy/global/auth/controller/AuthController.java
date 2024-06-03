@@ -10,10 +10,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import lombok.RequiredArgsConstructor;
-import java.net.URI;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,17 +21,27 @@ public class AuthController {
   private final AuthService authService;
 
   @PostMapping
-  public ResponseEntity<ApiResponse<SignupResponse>> signup(@RequestBody SignupRequest signupRequest) {
+  public ResponseEntity<ApiResponse<SignupResponse>> createUser(@RequestBody SignupRequest signupRequest) {
     User user = authService.createUser(signupRequest);
-
-    SignupResponse signupResponse = new SignupResponse(user.getId());
+    SignupResponse signupResponse = new SignupResponse(user.getId(),user.getUsername());
     ApiResponse<SignupResponse> response = new ApiResponse<>("201", "정상적으로 회원가입이 완료되었습니다.", signupResponse);
-    URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
-                                                      .path("/{id}")
-                                                      .buildAndExpand(user.getId())
-                                                      .toUri();
-    return ResponseEntity.created(uri).body(response);
+
+    return ResponseEntity.created(null).body(response);
   }
+
+
+//  @PostMapping
+//  public ResponseEntity<ApiResponse<SignupResponse>> signup(@RequestBody SignupRequest signupRequest) {
+//    User user = authService.createUser(signupRequest);
+//
+//    SignupResponse signupResponse = new SignupResponse(user.getId(),user.getUsername());
+//    ApiResponse<SignupResponse> response = new ApiResponse<>("201", "정상적으로 회원가입이 완료되었습니다.", signupResponse);
+//    URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
+//            .path("/{id}")
+//            .buildAndExpand(user.getId())
+//            .toUri();
+//    return ResponseEntity.created(uri).body(response);
+//  }
 
 //  @PostMapping("/login")
 //  public Response<ApiResponse<String>> login(@RequestBody LoginRequest loginRequest) {

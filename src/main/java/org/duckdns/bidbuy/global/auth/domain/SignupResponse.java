@@ -1,5 +1,6 @@
 package org.duckdns.bidbuy.global.auth.domain;
 
 public record SignupResponse(
-        Long id) 
+        Long user_id,
+        String username)
 {}

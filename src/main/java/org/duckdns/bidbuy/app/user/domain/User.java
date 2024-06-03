@@ -1,10 +1,7 @@
 package org.duckdns.bidbuy.app.user.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.duckdns.bidbuy.app.article.domain.Article;
 import org.duckdns.bidbuy.app.article.domain.LikeArticle;
@@ -19,7 +16,7 @@ import java.util.List;
 @SuperBuilder
 @Getter
 @AllArgsConstructor
-@NoArgsConstructor
+@RequiredArgsConstructor
 @ToString(callSuper = true)
 @Table(name = "user")
 public class User extends BaseEntity {
@@ -33,6 +30,10 @@ public class User extends BaseEntity {
     private String password;
     private String username;
     private String name;
+
+    private String addr1;
+    private String addr2;
+
     private String provider;
     private String providerId;
     private String profileImageUrl;
@@ -62,4 +63,6 @@ public class User extends BaseEntity {
         this.name = name;
         this.email = email;
     }
+
+
 }
