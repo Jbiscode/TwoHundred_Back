@@ -34,7 +34,7 @@ public class ArticleRequest {
     private String addr1;
     private String addr2;
 
-//    private User writer;
+    private Long writerId;
 
     // 업로드 처리가 필요한 파일의 이름을 저장하는 리스트
     @Builder.Default

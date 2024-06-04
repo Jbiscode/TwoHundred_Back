@@ -51,10 +51,3 @@ org:
       upload:
         path: upload
 
-ncp:
-  objectstorage:
-    endpoint: https://kr.object.ncloudstorage.com
-    region: kr-standard
-    accessKey: 2F4FE0D61148A0661AB9
-    secretKey: B7933F08A45029910FA48FFFD62B979E8BBD66DE
-    bucket: kjwtest

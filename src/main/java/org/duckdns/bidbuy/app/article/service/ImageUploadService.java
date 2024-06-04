@@ -1,6 +1,7 @@
 package org.duckdns.bidbuy.app.article.service;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,9 +29,9 @@ public class ImageUploadService {
         for (MultipartFile multipartFile : multipartFiles) {
             File file = convertMultiPartToFile(multipartFile);
             String fileName = "article/" + generateFileName(multipartFile.getOriginalFilename());
-            amazonS3.putObject(new PutObjectRequest(bucket, fileName, file));
+            amazonS3.putObject(new PutObjectRequest(bucket, fileName, file).withCannedAcl(CannedAccessControlList.PublicRead));
             file.delete();
-            imageUrls.add(amazonS3.getUrl(bucket, fileName).toString());
+            imageUrls.add(fileName.substring(fileName.lastIndexOf("/") + 1));
         }
         return imageUrls;
     }

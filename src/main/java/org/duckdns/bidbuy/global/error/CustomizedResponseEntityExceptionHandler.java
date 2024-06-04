@@ -2,6 +2,9 @@ package org.duckdns.bidbuy.global.error;
 
 import java.util.Date;
 
+import org.duckdns.bidbuy.app.article.exception.ArticleNoPermitException;
+import org.duckdns.bidbuy.app.article.exception.ArticleNotExistException;
+import org.duckdns.bidbuy.app.user.exception.PasswordLengthException;
 import org.duckdns.bidbuy.app.user.exception.UserNotFoundException;
 import org.duckdns.bidbuy.global.auth.exception.DuplicateIdExistException;
 import org.springframework.http.HttpHeaders;
@@ -44,10 +47,43 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
         return new ResponseEntity<>(exceptionResponse, HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(PasswordLengthException.class)
+    public final ResponseEntity<Object> passwordLengthExceptions(Exception ex, WebRequest request) {
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(NullInputException.class)
+    public final ResponseEntity<Object> nullInputException(Exception ex, WebRequest request) {
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.CONFLICT);
+    }
+
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         ExceptionResponse exceptionResponse =
                 new ExceptionResponse(new Date(), "검증에 실패했습니다.", ex.getBindingResult().toString());
         return new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(ArticleNoPermitException.class)
+    public final ResponseEntity<Object> articleNoPermitExceptions(Exception ex, WebRequest request) {
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(ArticleNotExistException.class)
+    public final ResponseEntity<Object> articleNotExistExceptions(Exception ex, WebRequest request) {
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
+    }
+
 }

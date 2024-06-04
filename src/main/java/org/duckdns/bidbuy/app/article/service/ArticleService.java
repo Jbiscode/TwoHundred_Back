@@ -1,14 +1,19 @@
 package org.duckdns.bidbuy.app.article.service;
 
+import com.nimbusds.jose.proc.SecurityContext;
 import lombok.RequiredArgsConstructor;
 import org.duckdns.bidbuy.app.article.domain.Article;
 import org.duckdns.bidbuy.app.article.domain.ProductImage;
 import org.duckdns.bidbuy.app.article.dto.ArticleRequest;
 import org.duckdns.bidbuy.app.article.dto.ArticleResponse;
+import org.duckdns.bidbuy.app.article.exception.ArticleNoPermitException;
+import org.duckdns.bidbuy.app.article.exception.ArticleNotExistException;
 import org.duckdns.bidbuy.app.article.repository.ArticleRepository;
 import org.duckdns.bidbuy.app.article.repository.ProductImageRepository;
 import org.duckdns.bidbuy.app.user.domain.User;
 import org.duckdns.bidbuy.app.user.repository.UserRepository;
+import org.duckdns.bidbuy.global.auth.domain.CustomUserDetails;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,8 +34,10 @@ public class ArticleService {
 
     @Transactional
     public ArticleResponse createArticle(ArticleRequest requestDTO, MultipartFile[] images) throws IOException {
-        // 현재 로그인한 사용자 정보 가져오기 (예시로 ID가 1인 사용자라고 가정)
-        User writer = userRepository.findById(1L).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+        CustomUserDetails principal = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = principal.getUser().getId();
+
+        User writer = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 
         Article article = Article.builder()
                 .title(requestDTO.getTitle())
@@ -53,7 +60,13 @@ public class ArticleService {
 
         List<String> imageUrls = imageUploadService.uploadImages(images);
         for (String imageUrl : imageUrls) {
-            ProductImage productImage = new ProductImage(null, imageUrl, savedArticle);
+//            ProductImage productImage = new ProductImage(null, imageUrl, savedArticle);
+            ProductImage productImage = ProductImage.builder()
+                    .imageUrl(imageUrl)
+                    .article(savedArticle)
+                    .createdDate(LocalDateTime.now())
+                    .modifiedDate(LocalDateTime.now())
+                    .build();
             productImageRepository.save(productImage);
         }
 
@@ -63,7 +76,14 @@ public class ArticleService {
 
 @Transactional
 public ArticleResponse updateArticle(Long id, ArticleRequest requestDTO, MultipartFile[] images) throws IOException {
-    Article article = articleRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
+    CustomUserDetails principal = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    Long userId = principal.getUser().getId();
+
+    Article article = articleRepository.findById(id).orElseThrow(() -> new ArticleNotExistException(id));
+
+    if(!article.getWriter().getId().equals(userId)) {
+        throw new ArticleNoPermitException(userId);
+    }
 
     // 게시글 업데이트
     Article updatedArticle = Article.builder()
@@ -95,7 +115,13 @@ public ArticleResponse updateArticle(Long id, ArticleRequest requestDTO, Multipa
 
         List<String> imageUrls = imageUploadService.uploadImages(images);
         for (String imageUrl : imageUrls) {
-            ProductImage productImage = new ProductImage(null, imageUrl, updatedArticle);
+//            ProductImage productImage = new ProductImage(null, imageUrl, updatedArticle);
+            ProductImage productImage = ProductImage.builder()
+                    .imageUrl(imageUrl)
+                    .article(updatedArticle)
+                    .createdDate(LocalDateTime.now())
+                    .modifiedDate(LocalDateTime.now())
+                    .build();
             productImageRepository.save(productImage);
         }
     }
@@ -103,15 +129,15 @@ public ArticleResponse updateArticle(Long id, ArticleRequest requestDTO, Multipa
     return ArticleResponse.from(updatedArticle);
 }
 
-    //    @Transactional
-//    public void deleteArticle(Long id) {
-//        Article article = articleRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
-//        productImageRepository.deleteByArticle(article);
-//        articleRepository.delete(article);
-//    }
     @Transactional
     public void deleteArticle(Long id) {
-        Article article = articleRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
+        Article article = articleRepository.findById(id).orElseThrow(() -> new ArticleNotExistException(id));
+        CustomUserDetails principal = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = principal.getUser().getId();
+
+        if (!article.getWriter().getId().equals(userId)) {
+            throw new ArticleNoPermitException(userId);
+        }
 
         List<ProductImage> images = productImageRepository.findByArticle(article);
         for (ProductImage productImage : images) {

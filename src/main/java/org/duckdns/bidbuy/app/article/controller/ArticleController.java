@@ -2,6 +2,7 @@
 package org.duckdns.bidbuy.app.article.controller;
 
 import com.amazonaws.services.s3.AmazonS3;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.duckdns.bidbuy.app.article.dto.ArticleRequest;
@@ -22,41 +23,36 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "/api/v1/article", produces = "application/json")
+@RequestMapping(value = "/api/v1/articles", produces = "application/json")
 @Log4j2
 public class ArticleController {
 
     private final ArticleService articleService;
 
-    private final ImageUploadService imageUploadService;
-
-    @PostMapping("/upload")
-    public ResponseEntity<List<String>> uploadImage(@RequestParam("images") MultipartFile[] multipartFiles) throws IOException {
-        List<String> imageUrls= imageUploadService.uploadImages(multipartFiles);
-        return ResponseEntity.ok(imageUrls);
-    }
-
+    @Operation(summary = "게시글 작성 API", description = "로그인된 사용자만 작성가능, 이미지 최소 1개 필수")
     @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<ApiResponse<ArticleResponse>> createArticle(@ModelAttribute ArticleRequest requestDTO) throws IOException {
         ArticleResponse responseDTO = articleService.createArticle(requestDTO, requestDTO.getFiles().toArray(new MultipartFile[0]));
         ApiResponse<ArticleResponse> response = new ApiResponse<>("201", "게시글이 성공적으로 생성되었습니다.", responseDTO);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}")
+                .path("/{articleId}")
                 .buildAndExpand(responseDTO.getId())
                 .toUri();
         return ResponseEntity.created(uri).body(response);
     }
 
-    @PutMapping(value = "/{id}", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<ApiResponse<ArticleResponse>> updateArticle(@PathVariable Long id, @ModelAttribute ArticleRequest requestDTO) throws IOException {
-        ArticleResponse responseDTO = articleService.updateArticle(id, requestDTO, requestDTO.getFiles().toArray(new MultipartFile[0]));
+    @Operation(summary = "게시글 수정 API", description = "로그인한 사용자 중 해당 게시글 작성자만 수정 가능, 이미지 최소 1개 필수")
+    @PutMapping(value = "/{articleId}", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<ApiResponse<ArticleResponse>> updateArticle(@PathVariable Long articleId, @ModelAttribute ArticleRequest requestDTO) throws IOException {
+        ArticleResponse responseDTO = articleService.updateArticle(articleId, requestDTO, requestDTO.getFiles().toArray(new MultipartFile[0]));
         ApiResponse<ArticleResponse> response = new ApiResponse<>("200", "게시글이 성공적으로 수정되었습니다.", responseDTO);
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping(value = "/{id}", consumes = MediaType.ALL_VALUE)
-    public ResponseEntity<ApiResponse<Void>> deleteArticle(@PathVariable Long id) {
-        articleService.deleteArticle(id);
+    @Operation(summary = "게시글 삭제 API", description = "로그인한 유저 정보를 검증하고 해당 게시글 작성자와 같을 경우 삭제 가능")
+    @DeleteMapping(value = "/{articleId}", consumes = MediaType.ALL_VALUE)
+    public ResponseEntity<ApiResponse<Void>> deleteArticle(@PathVariable Long articleId) {
+        articleService.deleteArticle(articleId);
         ApiResponse<Void> response = new ApiResponse<>("200", "게시글이 성공적으로 삭제되었습니다.", null);
         return ResponseEntity.ok(response);
     }
