@@ -1,11 +1,60 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    username: sa
-    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/test?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=Asia/Seoul
+    username: root
+    password: 1a2b3c4d*
   jpa:
     hibernate:
-      ddl-auto: create-drop
-  h2:
-    console:
-      enabled: true
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
+
+  jwt:
+    secret: ${jwt.secret}
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-name: google
+            client-id: ${oauth.google.client-id}
+            client-secret: ${oauth.google.client-secret}
+            redirect-uri: ${location.dev}/login/oauth2/code/google
+            authorization-grant-type: authorization_code
+            scope: profile,email
+          naver:
+            client-name: naver
+            client-id: ${oauth.naver.client-id}
+            client-secret: ${oauth.naver.client-secret}
+            redirect-uri: ${location.dev}/login/oauth2/code/naver
+            authorization-grant-type: authorization_code
+            scope: name,email
+
+        provider:
+          naver:
+            authorization-uri: https://nid.naver.com/oauth2.0/authorize
+            token-uri: https://nid.naver.com/oauth2.0/token
+            user-info-uri: https://openapi.naver.com/v1/nid/me
+            user-name-attribute: response
+
+logging:
+  level:
+    com:
+      zaxxer: INFO
+
+org:
+  duckdns:
+    bidbuy:
+      upload:
+        path: upload
+
+ncp:
+  objectstorage:
+    endpoint: https://kr.object.ncloudstorage.com
+    region: kr-standard
+    accessKey: 2F4FE0D61148A0661AB9
+    secretKey: B7933F08A45029910FA48FFFD62B979E8BBD66DE
+    bucket: kjwtest
