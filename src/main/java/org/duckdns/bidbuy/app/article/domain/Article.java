@@ -21,7 +21,7 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(callSuper = true)
+@ToString(callSuper = true, exclude = {"productImages", "offers", "review", "likes"})
 @Table(name = "article")
 public class Article extends BaseEntity {
 
@@ -38,6 +38,8 @@ public class Article extends BaseEntity {
     private Integer quantity;
     private Long likeCount;
     private Long viewCount;
+    private String addr1;
+    private String addr2;
 
 
     @Enumerated(EnumType.STRING)
@@ -62,4 +64,15 @@ public class Article extends BaseEntity {
     @OneToMany(mappedBy = "article")
     private List<LikeArticle> likes = new ArrayList<>();
 
+    public void update(String title, String content, Integer price, Integer quantity, String addr1, String addr2, Category category, TradeMethod tradeMethod, TradeStatus tradeStatus) {
+        this.title = title;
+        this.content = content;
+        this.price = price;
+        this.quantity = quantity;
+        this.addr1 = addr1;
+        this.addr2 = addr2;
+        this.category = category;
+        this.tradeMethod = tradeMethod;
+        this.tradeStatus = tradeStatus;
+    }
 }
