@@ -45,9 +45,4 @@ logging:
     com:
       zaxxer: INFO
 
-org:
-  duckdns:
-    bidbuy:
-      upload:
-        path: upload
 
