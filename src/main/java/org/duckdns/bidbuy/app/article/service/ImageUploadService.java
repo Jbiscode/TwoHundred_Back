@@ -3,6 +3,7 @@ package org.duckdns.bidbuy.app.article.service;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -11,9 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class ImageUploadService {
@@ -24,16 +23,32 @@ public class ImageUploadService {
     @Value("${ncp.objectstorage.bucket}")
     private String bucket;
 
-    public List<String> uploadImages(MultipartFile[] multipartFiles) throws IOException {
-        List<String> imageUrls = new ArrayList<>();
-        for (MultipartFile multipartFile : multipartFiles) {
-            File file = convertMultiPartToFile(multipartFile);
-            String fileName = "article/" + generateFileName(multipartFile.getOriginalFilename());
-            amazonS3.putObject(new PutObjectRequest(bucket, fileName, file).withCannedAcl(CannedAccessControlList.PublicRead));
-            file.delete();
-            imageUrls.add(fileName.substring(fileName.lastIndexOf("/") + 1));
+    public List<Map<String, String>> uploadImages(MultipartFile[] multipartFiles) throws IOException {
+        List<Map<String, String>> imageUrlMaps = new ArrayList<>();
+        for (int i = 0; i < multipartFiles.length; i++) {
+            MultipartFile multipartFile = multipartFiles[i];
+            File originalFile = convertMultiPartToFile(multipartFile);
+            String originalFileName = "article/" + generateFileName(multipartFile.getOriginalFilename());
+
+            Map<String, String> imageUrlMap = new HashMap<>();
+            imageUrlMap.put("original", originalFileName.substring(originalFileName.lastIndexOf("/") + 1));
+
+            // 첫 번째 이미지인 경우에만 썸네일 생성
+            if (i == 0) {
+                File thumbnailFile = new File("s_" + originalFile.getName());
+                Thumbnails.of(originalFile).size(600, 600).toFile(thumbnailFile);
+                String thumbnailFileName = "article/s_" + originalFileName.substring(originalFileName.lastIndexOf("/") + 1);
+                amazonS3.putObject(new PutObjectRequest(bucket, thumbnailFileName, thumbnailFile).withCannedAcl(CannedAccessControlList.PublicRead));
+                imageUrlMap.put("thumbnail", thumbnailFileName.substring(thumbnailFileName.lastIndexOf("/") + 1));
+                thumbnailFile.delete();
+            }
+
+            amazonS3.putObject(new PutObjectRequest(bucket, originalFileName, originalFile).withCannedAcl(CannedAccessControlList.PublicRead));
+            originalFile.delete();
+
+            imageUrlMaps.add(imageUrlMap);
         }
-        return imageUrls;
+        return imageUrlMaps;
     }
 
     private File convertMultiPartToFile(MultipartFile file) throws IOException {

@@ -55,6 +55,9 @@ dependencies {
 
     // https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-s3
     implementation group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.12.734'
+
+    // Thumbnail generator
+    implementation group: 'net.coobird', name: 'thumbnailator', version: '0.4.13'
 }
 
 tasks.named('test') {
