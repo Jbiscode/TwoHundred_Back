@@ -1,14 +1,14 @@
 // ArticleController.java
 package org.duckdns.bidbuy.app.article.controller;
 
-import com.amazonaws.services.s3.AmazonS3;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.duckdns.bidbuy.app.article.dto.ArticleRequest;
 import org.duckdns.bidbuy.app.article.dto.ArticleResponse;
+import org.duckdns.bidbuy.app.article.dto.ArticleDetailResponse;
+import org.duckdns.bidbuy.app.article.dto.ArticleSummaryResponse;
 import org.duckdns.bidbuy.app.article.service.ArticleService;
-import org.duckdns.bidbuy.app.article.service.ImageUploadService;
 import org.duckdns.bidbuy.global.common.response.ApiResponse;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -54,6 +54,22 @@ public class ArticleController {
     public ResponseEntity<ApiResponse<Void>> deleteArticle(@PathVariable Long articleId) {
         articleService.deleteArticle(articleId);
         ApiResponse<Void> response = new ApiResponse<>("200", "게시글이 성공적으로 삭제되었습니다.", null);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "게시글 조회 API", description = "게시글 상세정보 조회")
+    @GetMapping(value = "/{articleId}")
+    public ResponseEntity<ApiResponse<ArticleDetailResponse>> getArticleDetail(@PathVariable Long articleId){
+        ArticleDetailResponse articleDetailResponse = articleService.getArticleDetail(articleId);
+        ApiResponse<ArticleDetailResponse> response = new ApiResponse<>("200", "게시글 상세정보 조회 성공", articleDetailResponse);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "전체 게시글 조회 API", description = "전체 게시글 정보 조회")
+    @GetMapping(value = "/")
+    public ResponseEntity<ApiResponse<List<ArticleSummaryResponse>>> getAllArticles(){
+        List<ArticleSummaryResponse> articleSummaryResponses = articleService.getAllArticles();
+        ApiResponse<List<ArticleSummaryResponse>> response = new ApiResponse<>("200", "전체 게시글 조회 성공", articleSummaryResponses);
         return ResponseEntity.ok(response);
     }
 }

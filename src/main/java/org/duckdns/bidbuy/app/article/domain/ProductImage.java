@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
-import org.duckdns.bidbuy.app.article.domain.Article;
 import org.duckdns.bidbuy.global.common.entity.BaseEntity;
 
 import static jakarta.persistence.FetchType.LAZY;
