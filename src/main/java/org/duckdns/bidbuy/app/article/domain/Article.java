@@ -15,6 +15,8 @@ import org.duckdns.bidbuy.global.common.entity.BaseEntity;
 import java.util.ArrayList;
 import java.util.List;
 
+import static jakarta.persistence.FetchType.LAZY;
+
 
 @Entity
 @SuperBuilder
@@ -48,7 +50,7 @@ public class Article extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private TradeStatus tradeStatus;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "writer_id")
     private User writer;
 
@@ -58,7 +60,7 @@ public class Article extends BaseEntity {
     @OneToMany(mappedBy = "article")
     private List<Offer> offers = new ArrayList<>();
 
-    @OneToOne(mappedBy = "article")
+    @OneToOne(fetch = LAZY, mappedBy = "article")
     private Review review;
 
     @OneToMany(mappedBy = "article")
