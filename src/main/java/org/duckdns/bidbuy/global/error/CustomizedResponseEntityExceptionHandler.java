@@ -4,6 +4,8 @@ import java.util.Date;
 
 import org.duckdns.bidbuy.app.article.exception.ArticleNoPermitException;
 import org.duckdns.bidbuy.app.article.exception.ArticleNotExistException;
+import org.duckdns.bidbuy.app.article.exception.WriterNotFoundException;
+import org.duckdns.bidbuy.app.offer.exception.OffererNotFoundException;
 import org.duckdns.bidbuy.app.user.exception.PasswordLengthException;
 import org.duckdns.bidbuy.app.user.exception.UserNotFoundException;
 import org.duckdns.bidbuy.global.auth.exception.DuplicateIdExistException;
@@ -80,6 +82,22 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
 
     @ExceptionHandler(ArticleNotExistException.class)
     public final ResponseEntity<Object> articleNotExistExceptions(Exception ex, WebRequest request) {
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(WriterNotFoundException.class)
+    public final ResponseEntity<Object> writerNotFoundExceptions(Exception ex, WebRequest request) {
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(OffererNotFoundException.class)
+    public final ResponseEntity<Object> offererNotFoundExceptions(Exception ex, WebRequest request) {
         ExceptionResponse exceptionResponse =
                 new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
 
