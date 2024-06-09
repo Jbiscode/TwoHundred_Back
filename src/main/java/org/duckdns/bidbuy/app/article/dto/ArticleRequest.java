@@ -15,7 +15,6 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
 public class ArticleRequest {
 
     @NotBlank
