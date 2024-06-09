@@ -1,10 +1,12 @@
 package org.duckdns.bidbuy.app.user.controller;
 
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.duckdns.bidbuy.app.article.domain.TradeStatus;
 import org.duckdns.bidbuy.app.user.dto.MyProfileResponse;
 import org.duckdns.bidbuy.app.user.dto.MySalesResponse;
+import org.duckdns.bidbuy.app.user.dto.PageResponseDTO;
 import org.duckdns.bidbuy.app.user.service.UserService;
 
 import org.duckdns.bidbuy.global.common.response.ApiResponse;
@@ -28,6 +30,7 @@ public class UserController {
 
     private final UserService userService;
 
+    @Operation(summary = "내 정보 불러오기 API", description = "로그인된 사용자만 내 정보 불러올 수 있음")
     @GetMapping(value = "/me")
     public ResponseEntity<ApiResponse<?>> getUser() {
         MyProfileResponse responseDTO = userService.getMyProfile();
@@ -35,15 +38,39 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping(value = "/me/{tradeStatus}")
-    public ResponseEntity<ApiResponse<Page<MySalesResponse>>> getUserSales(
-            @PageableDefault( page=0, size = 4, direction = Sort.Direction.DESC) Pageable pageable,
+    @Operation(summary = "내 판매상품 정보 불러오기 API, 최신순 정렬", description = "로그인된 사용자만 내 정보 불러올 수 있음")
+    @GetMapping(value = "/me/{tradeStatus}/latest")
+    public ResponseEntity<ApiResponse<PageResponseDTO<List<MySalesResponse>>>> getUserSalesOrderByLatest(
+            @PageableDefault( page=0, size = 4, direction = Sort.Direction.DESC, sort = "createdDate") Pageable pageable,
             @PathVariable(name = "tradeStatus") TradeStatus tradeStatus) {
-        System.out.println("skf dho ahtqkedk!!!!!!");
 
         // batch
-        Page<MySalesResponse> responseDTO = userService.getMySales(tradeStatus, pageable);
-        ApiResponse<Page<MySalesResponse>> response = new ApiResponse<>("200", "판매중인 상품목록을 불러오는데 성공하였습니다.", responseDTO);
+        PageResponseDTO<List<MySalesResponse>> responseDTO = userService.getMySales(tradeStatus, pageable);
+        ApiResponse<PageResponseDTO<List<MySalesResponse>>> response = new ApiResponse<>("200", "판매중인 상품목록을 불러오는데 성공하였습니다.", responseDTO);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "내 판매상품 정보 불러오기 API, 낮은 가격순 정렬", description = "로그인된 사용자만 내 정보 불러올 수 있음")
+    @GetMapping(value = "/me/{tradeStatus}/low-price")
+    public ResponseEntity<ApiResponse<PageResponseDTO<List<MySalesResponse>>>> getUserSalesOrderByPriceASC(
+            @PageableDefault( page=0, size = 4, direction = Sort.Direction.ASC, sort = "price") Pageable pageable,
+            @PathVariable(name = "tradeStatus") TradeStatus tradeStatus) {
+
+        // batch
+        PageResponseDTO<List<MySalesResponse>> responseDTO = userService.getMySales(tradeStatus, pageable);
+        ApiResponse<PageResponseDTO<List<MySalesResponse>>> response = new ApiResponse<>("200", "판매중인 상품목록을 불러오는데 성공하였습니다.", responseDTO);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "내 판매상품 정보 불러오기 API, 높은 가격순 정렬", description = "로그인된 사용자만 내 정보 불러올 수 있음")
+    @GetMapping(value = "/me/{tradeStatus}/high-price")
+    public ResponseEntity<ApiResponse<PageResponseDTO<List<MySalesResponse>>>> getUserSalesOrderByPriceDESC(
+            @PageableDefault( page=0, size = 4, direction = Sort.Direction.DESC, sort = "price") Pageable pageable,
+            @PathVariable(name = "tradeStatus") TradeStatus tradeStatus) {
+
+        // batch
+        PageResponseDTO<List<MySalesResponse>> responseDTO = userService.getMySales(tradeStatus, pageable);
+        ApiResponse<PageResponseDTO<List<MySalesResponse>>> response = new ApiResponse<>("200", "판매중인 상품목록을 불러오는데 성공하였습니다.", responseDTO);
         return ResponseEntity.ok(response);
     }
 
