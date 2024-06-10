@@ -30,6 +30,7 @@ public class ArticleDetailResponse {
     private Long writerId;
     private String writerUsername;
     private String writerProfileImageUrl;
+    private String thumbnailUrl;
     private String[] imageUrls;
 
     private List<OfferResponse> offers;

@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -178,6 +179,9 @@ public ArticleResponse updateArticle(Long id, ArticleRequest requestDTO, Multipa
         List<ProductImage> images = productImageRepository.findByArticle(article);
         String[] imageUrls = images.stream().map(ProductImage::getImageUrl).toArray(String[]::new);
         List<OfferResponse> offers = offerService.getOffersByArticleId(id);
+        offers = offers.stream()
+                .sorted(Comparator.comparing(OfferResponse::getOfferPrice))
+                .collect(Collectors.toList());
 
         return new ArticleDetailResponse(
                 article.getId(),
@@ -194,6 +198,7 @@ public ArticleResponse updateArticle(Long id, ArticleRequest requestDTO, Multipa
                 article.getWriter().getId(),
                 article.getWriter().getUsername(),
                 article.getWriter().getProfileImageUrl(),
+                article.getProductImages().get(0).getThumbnailUrl(),
                 imageUrls,
                 offers
         );
