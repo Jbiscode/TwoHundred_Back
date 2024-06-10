@@ -25,19 +25,19 @@ public class SearchController {
     private final SearchService searchService;
 
     //전체 조회
-    @GetMapping("")
-    public ResponseEntity<ApiResponse<List>> search() {
-        List<Article> search = searchService.searchAll();
-        List<SearchArticleResponse> result = search.stream()
-                .map(s -> new SearchArticleResponse(s))
-                .collect(toList());
-        ApiResponse<List> response = new ApiResponse<>("200", "검색결과 페이지: 게시글 전체조회 완료", result);
-        return ResponseEntity.ok(response);
-    }
+//    @GetMapping("")
+//    public ResponseEntity<ApiResponse<List>> search() {
+//        List<Article> search = searchService.searchAll();
+//        List<SearchArticleResponse> result = search.stream()
+//                .map(s -> new SearchArticleResponse(s))
+//                .collect(toList());
+//        ApiResponse<List> response = new ApiResponse<>("200", "검색결과 페이지: 게시글 전체조회 완료", result);
+//        return ResponseEntity.ok(response);
+//    }
 
 
     //카테고리&내용 조회
-    @GetMapping("/")
+    @GetMapping("")
     public ResponseEntity<ApiResponse<List>> search(@RequestParam(required = false) String content,
                                                            @RequestParam(required = false) Category category,
                                                            @RequestParam(required = false) TradeMethod tradeMethod) {
@@ -85,6 +85,19 @@ public class SearchController {
                 .map(s -> new SearchArticleResponse(s))
                 .collect(toList());
         ApiResponse<List> response = new ApiResponse<>("200", "검색결과 페이지: 최신순 조회 완료", result);
+        return ResponseEntity.ok(response);
+    }
+
+    //인기순
+    @GetMapping("/orderByHot")
+    public ResponseEntity<ApiResponse<List>> searchOrderByHot(@RequestParam(required = false) String content,
+                                                                 @RequestParam(required = false) Category category,
+                                                                 @RequestParam(required = false) TradeMethod tradeMethod) {
+        List<Article> search = searchService.searchOrderByHot(category, tradeMethod, content);
+        List<SearchArticleResponse> result = search.stream()
+                .map(s -> new SearchArticleResponse(s))
+                .collect(toList());
+        ApiResponse<List> response = new ApiResponse<>("200", "검색결과 페이지: 인기순 조회 완료", result);
         return ResponseEntity.ok(response);
     }
 
