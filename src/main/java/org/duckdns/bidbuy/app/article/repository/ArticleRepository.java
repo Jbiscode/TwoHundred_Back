@@ -13,12 +13,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface ArticleRepository extends JpaRepository<Article, Long> {
-    @Query("SELECT a FROM Article a " +
-            "JOIN a.offers o " +
-            "WHERE o.offerer.id = :userId " +
-            "AND a.tradeStatus = 'SOLD_OUT'")
-    List<Article> findSoldOutArticlesByUserId(@Param("userId") Long userId);
-
     int countByWriter_Id(Long userId);
 
     @Query("SELECT a.id, a.title, a.price, a.addr1, a.addr2, a.tradeStatus, a.createdDate ,pi.thumbnailUrl " +
@@ -54,4 +48,27 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
             AND pi.thumbnailUrl IS NOT NULL
     """)
     Page<Object[]> getOfferedArticlesByUserId(@Param("userId") Long userId, Pageable pageable);
+
+    @Query("""
+    SELECT
+        a.id,
+        a.title,
+        a.price,
+        a.addr1,
+        a.addr2,
+        a.tradeStatus,
+        a.createdDate,
+        pi.thumbnailUrl,
+        CASE WHEN la.id IS NOT NULL THEN TRUE ELSE FALSE END AS isLiked
+    FROM Article a
+    JOIN a.productImages pi
+    LEFT JOIN LikeArticle la ON a.id = la.article.id AND la.user.id = :userId
+    WHERE a.id IN (
+        SELECT o.article.id
+        FROM Offer o
+        WHERE o.offerer.id = :userId AND o.isSelected = TRUE
+    )
+    AND pi.thumbnailUrl IS NOT NULL
+""")
+    Page<Object[]> getOfferedArticlesByUserIdAndIsSelected(@Param("userId") Long userId, Pageable pageable);
 }

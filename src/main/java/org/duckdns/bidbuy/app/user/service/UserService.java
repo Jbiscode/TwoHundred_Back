@@ -81,7 +81,7 @@ public class UserService {
         int countSale = articleRepository.countByWriter_Id(userId);
         int countLike = likeArticleRepository.countByUser_id(userId);
         int countOffer = offerRepository.countByOfferer_id(userId);
-        int countBuy = articleRepository.findSoldOutArticlesByUserId(userId).size();
+        int countBuy = offerRepository.countBuy(userId);
 
         return  MyProfileResponse.from(userDto, countSale, countLike, countOffer, countBuy);
     }
@@ -167,6 +167,19 @@ public class UserService {
             likeArticleRepository.save(likeArticle);
             return "상품을 찜목록에 등록했습니다.";
         }
+    }
+
+    public PageResponseDTO<List<MySalesResponse>> getMyBuys(TradeStatus tradeStatus, Pageable pageable) {
+        CustomUserDetails principal = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = principal.getUser().getId();
+        userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+
+        Page<Object[]> articles = articleRepository.getOfferedArticlesByUserIdAndIsSelected(userId, pageable);
+        List<MySalesResponse> responses = articles.stream()
+                .map(this::createMySalesResponse)
+                .toList();
+        PageResponseDTO pageResponseDTO = new PageResponseDTO(responses, pageable, articles.getTotalElements());
+        return pageResponseDTO;
     }
 
     // 현재 시간과의 차이 계산
