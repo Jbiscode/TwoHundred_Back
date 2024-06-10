@@ -9,6 +9,7 @@ import org.duckdns.bidbuy.app.offer.repository.OfferRepository;
 import org.duckdns.bidbuy.app.user.dto.MyProfileResponse;
 import org.duckdns.bidbuy.app.user.domain.User;
 import org.duckdns.bidbuy.app.user.dto.MySalesResponse;
+import org.duckdns.bidbuy.app.user.dto.PageResponseDTO;
 import org.duckdns.bidbuy.app.user.dto.UserDto;
 import org.duckdns.bidbuy.app.user.repository.UserRepository;
 import org.duckdns.bidbuy.global.auth.domain.CustomUserDetails;
@@ -81,7 +82,7 @@ public class UserService {
     }
 
 
-    public Page<MySalesResponse> getMySales(TradeStatus status, Pageable pageable) {
+    public PageResponseDTO getMySales(TradeStatus status, Pageable pageable) {
         CustomUserDetails principal = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = principal.getUser().getId();
 
@@ -120,6 +121,8 @@ public class UserService {
                 })
                 .toList();
 
-        return new PageImpl<>(responses, pageable, articles.getTotalElements());
+        PageResponseDTO pageResponseDTO = new PageResponseDTO(responses, pageable, articles.getTotalElements());
+
+        return pageResponseDTO;
     }
 }
