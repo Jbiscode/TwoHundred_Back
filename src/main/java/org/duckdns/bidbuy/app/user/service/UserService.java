@@ -2,7 +2,9 @@ package org.duckdns.bidbuy.app.user.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.duckdns.bidbuy.app.article.domain.Article;
+import org.duckdns.bidbuy.app.article.domain.LikeArticle;
 import org.duckdns.bidbuy.app.article.domain.TradeStatus;
+import org.duckdns.bidbuy.app.article.exception.LikeArticleNotFoundException;
 import org.duckdns.bidbuy.app.article.repository.ArticleRepository;
 import org.duckdns.bidbuy.app.article.repository.LikeArticleRepository;
 import org.duckdns.bidbuy.app.offer.repository.OfferRepository;
@@ -11,6 +13,7 @@ import org.duckdns.bidbuy.app.user.domain.User;
 import org.duckdns.bidbuy.app.user.dto.MySalesResponse;
 import org.duckdns.bidbuy.app.user.dto.PageResponseDTO;
 import org.duckdns.bidbuy.app.user.dto.UserDto;
+import org.duckdns.bidbuy.app.user.exception.ForbiddenException;
 import org.duckdns.bidbuy.app.user.repository.UserRepository;
 import org.duckdns.bidbuy.global.auth.domain.CustomUserDetails;
 import org.springframework.data.domain.Page;
@@ -20,10 +23,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -85,44 +90,118 @@ public class UserService {
     public PageResponseDTO getMySales(TradeStatus status, Pageable pageable) {
         CustomUserDetails principal = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = principal.getUser().getId();
+        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 
-        log.info("pageanle ={}", pageable);
         Page<Object[]> articles = articleRepository.findByWriterIdAndTradeStatus(userId, status, pageable);
 
         List<MySalesResponse> responses = articles.stream()
-                .map(article -> {
-                    Long id = (Long) article[0];
-                    String title = (String) article[1];
-                    Integer price = (Integer) article[2];
-                    String addr1 = (String) article[3];
-                    String addr2 = (String) article[4];
-                    TradeStatus tradeStatus = (TradeStatus) article[5];
-                    LocalDateTime createdDate = (LocalDateTime) article[6];
-                    String thumbnailUrl = (String) article[7];
-
-                    // 현재 시간과의 차이 계산
-                    Duration duration = Duration.between(createdDate, LocalDateTime.now());
-                    long seconds = duration.getSeconds();
-
-                    // 적절한 시간 단위로 변환
-                    String timeAgo;
-                    if (seconds < 60) {
-                        timeAgo = seconds + "초 전";
-                    } else if (seconds < 3600) {
-                        timeAgo = (int) (seconds / 60) + "분 전";
-                    } else if (seconds < 86400) {
-                        timeAgo = (int) (seconds / 3600) + "시간 전";
-                    } else {
-                        timeAgo = (int) (seconds / 86400) + "일 전";
-                    }
-
-                    return new MySalesResponse(id, title, price, addr1, addr2, tradeStatus, timeAgo, thumbnailUrl);
-
-                })
+                .map(this::createMySalesResponse)
                 .toList();
 
         PageResponseDTO pageResponseDTO = new PageResponseDTO(responses, pageable, articles.getTotalElements());
 
         return pageResponseDTO;
     }
+
+    public PageResponseDTO getLikeArticles(Pageable pageable) {
+        CustomUserDetails principal = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = principal.getUser().getId();
+        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+
+        Page<Object[]> articles = articleRepository.findArticlesByUserIdWithLikes(userId,pageable);
+        List<MySalesResponse> responses = articles.stream()
+                .map(this::createMySalesResponse)
+                .toList();
+
+        PageResponseDTO pageResponseDTO = new PageResponseDTO(responses, pageable, articles.getTotalElements());
+        return pageResponseDTO;
+    }
+
+    @Transactional
+    public void removeLikeArticles(Long articleId) {
+        CustomUserDetails principal = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = principal.getUser().getId();
+        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+
+        Optional<LikeArticle> likeArticle = likeArticleRepository.findByArticleIdAndUserId(articleId, userId);
+        if (likeArticle.isEmpty()) {
+            throw new LikeArticleNotFoundException("찜한 상품이 존재하지 않습니다.");
+        }
+
+        likeArticleRepository.deleteByArticleIdAndUserId(articleId, userId);
+    }
+
+    public PageResponseDTO<List<MySalesResponse>> getMyOffers(TradeStatus tradeStatus, Pageable pageable) {
+        CustomUserDetails principal = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = principal.getUser().getId();
+        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+
+        Page<Object[]> articles = articleRepository.getOfferedArticlesByUserId(userId, pageable);
+        List<MySalesResponse> responses = articles.stream()
+                .map(this::createMySalesResponse)
+                .toList();
+        PageResponseDTO pageResponseDTO = new PageResponseDTO(responses, pageable, articles.getTotalElements());
+        return pageResponseDTO;
+    }
+
+    @Transactional
+    public String updateLikeArticles(Long articleId) {
+        CustomUserDetails principal = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = principal.getUser().getId();
+        userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+
+        Optional<LikeArticle> likeArticles = likeArticleRepository.findByArticleIdAndUserId(articleId, userId);
+        Optional<Article> article = articleRepository.findById(articleId);
+        if(article.isEmpty()) throw new IllegalArgumentException("게시글이 존재하지 않습니다.");
+        if(article.get().getWriter().getId().equals(userId)) throw new ForbiddenException("본인의 게시글는 찜할 수 없습니다.");
+
+        if(likeArticles.isPresent()){
+            likeArticleRepository.deleteByArticleIdAndUserId(articleId, userId);
+            return "찜한 상품을 목록에서 제거했습니다.";
+        }else{
+            LikeArticle likeArticle = LikeArticle.builder()
+                    .user(User.builder().id(userId).build())
+                    .article(Article.builder().id(articleId).build())
+                    .build();
+
+            likeArticleRepository.save(likeArticle);
+            return "상품을 찜목록에 등록했습니다.";
+        }
+    }
+
+    // 현재 시간과의 차이 계산
+    private String getTimeAgo(LocalDateTime createdDate) {
+        Duration duration = Duration.between(createdDate, LocalDateTime.now());
+        long seconds = duration.getSeconds();
+
+        if (seconds < 60) {
+            return seconds + "초 전";
+        } else if (seconds < 3600) {
+            return (int) (seconds / 60) + "분 전";
+        } else if (seconds < 86400) {
+            return (int) (seconds / 3600) + "시간 전";
+        } else {
+            return (int) (seconds / 86400) + "일 전";
+        }
+    }
+
+    // MySalesResponse 객체 생성메서드
+    private MySalesResponse createMySalesResponse(Object[] article) {
+        Long id = (Long) article[0];
+        String title = (String) article[1];
+        Integer price = (Integer) article[2];
+        String addr1 = (String) article[3];
+        String addr2 = (String) article[4];
+        TradeStatus tradeStatus = (TradeStatus) article[5];
+        LocalDateTime createdDate = (LocalDateTime) article[6];
+        String thumbnailUrl = (String) article[7];
+        Boolean isLiked = article.length > 8 ? (Boolean) article[8] : null;
+
+        String timeAgo = getTimeAgo(createdDate);
+
+        return new MySalesResponse(id, title, price, addr1, addr2, tradeStatus, timeAgo, thumbnailUrl, isLiked);
+    }
+
+
+
 }
