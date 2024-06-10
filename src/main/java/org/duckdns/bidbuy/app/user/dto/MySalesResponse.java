@@ -1,9 +1,6 @@
 package org.duckdns.bidbuy.app.user.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.duckdns.bidbuy.app.article.domain.TradeStatus;
 
 import java.time.LocalDateTime;
@@ -21,6 +18,6 @@ public class MySalesResponse {
     private TradeStatus tradeStatus;
     private String timeAgo;
     private String thumbnailUrl;
-
+    private Boolean isLiked;
 
 }

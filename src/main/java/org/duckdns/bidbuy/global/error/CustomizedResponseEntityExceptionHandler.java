@@ -4,8 +4,10 @@ import java.util.Date;
 
 import org.duckdns.bidbuy.app.article.exception.ArticleNoPermitException;
 import org.duckdns.bidbuy.app.article.exception.ArticleNotExistException;
+import org.duckdns.bidbuy.app.article.exception.LikeArticleNotFoundException;
 import org.duckdns.bidbuy.app.article.exception.WriterNotFoundException;
 import org.duckdns.bidbuy.app.offer.exception.OffererNotFoundException;
+import org.duckdns.bidbuy.app.user.exception.ForbiddenException;
 import org.duckdns.bidbuy.app.user.exception.PasswordLengthException;
 import org.duckdns.bidbuy.app.user.exception.UserNotFoundException;
 import org.duckdns.bidbuy.global.auth.exception.DuplicateIdExistException;
@@ -18,8 +20,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-
-
 
 
 @ControllerAdvice
@@ -104,4 +104,19 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
         return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(LikeArticleNotFoundException.class)
+    public final ResponseEntity<Object> likeArticleNotFoundExceptions(Exception ex, WebRequest request) {
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public final ResponseEntity<Object> forbiddenException(Exception ex, WebRequest request) {
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.FORBIDDEN);
+    }
 }
