@@ -1,14 +1,11 @@
 package org.duckdns.bidbuy.app.search.dto;
 
-import lombok.Data;
 import lombok.Getter;
 import org.duckdns.bidbuy.app.article.domain.Article;
 import org.duckdns.bidbuy.app.article.domain.Category;
 import org.duckdns.bidbuy.app.article.domain.TradeMethod;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Getter
 public class SearchArticleResponse {
@@ -19,11 +16,11 @@ public class SearchArticleResponse {
     private String title;
     private String content;
     private Integer price;
-    private Integer quantity;
-    private Long likeCount;
-    private Long viewCount;
     private String addr1;
     private String addr2;
+    private Long viewCount;
+    private Long imageId;
+    private String imageUrl;
 
     private TradeMethod tradeMethod;
 
@@ -31,19 +28,19 @@ public class SearchArticleResponse {
 
 
 
-
     public SearchArticleResponse(Article article) {
-        id = article.getId();
-        category = article.getCategory();
-        title = article.getTitle();
-        content = article.getContent();
-        price = article.getPrice();
-        quantity = article.getQuantity();
-        likeCount = article.getLikeCount();
-        viewCount = article.getViewCount();
-        addr1 = article.getAddr1();
-        addr2 = article.getAddr2();
-        tradeMethod = article.getTradeMethod();
-        createdDate = article.getCreatedDate();
+        this.id = article.getId();
+        this.category = article.getCategory();
+        this.title = article.getTitle();
+        this.content = article.getContent();
+        this.price = article.getPrice();
+        this.addr1 = article.getAddr1();
+        this.addr2 = article.getAddr2();
+        this.viewCount = article.getViewCount();
+        this.tradeMethod = article.getTradeMethod();
+        this.createdDate = article.getCreatedDate();
+        this.imageUrl = article.getProductImages().get(0).getImageUrl();
+        this.imageId = article.getProductImages().get(0).getId();
+
     }
 }

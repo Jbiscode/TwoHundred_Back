@@ -38,4 +38,8 @@ public class SearchService {
     public List<Article> searchOrderByLatest(Category category, TradeMethod tradeMethod, String content) {
         return searchRepository.searchOrderByLatest(category, tradeMethod, content);
     }
+
+    public List<Article> searchOrderByHot(Category category, TradeMethod tradeMethod, String content) {
+        return searchRepository.searchOrderByHot(category, tradeMethod, content);
+    }
 }
