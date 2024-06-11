@@ -41,5 +41,6 @@ public class SearchArticleResponse {
         this.createdDate = article.getCreatedDate();
         this.imageUrl = article.getProductImages().get(0).getImageUrl();
         this.imageId = article.getProductImages().get(0).getId();
+
     }
 }
