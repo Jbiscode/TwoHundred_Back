@@ -16,4 +16,6 @@ public interface OfferRepository extends JpaRepository<Offer, Long> {
 
     @Query("SELECT COUNT(o) FROM Offer o WHERE o.offerer.id = :userId AND o.isSelected = true")
     int countBuy(@Param("userId") Long userId);
+
+    Offer findByIsSelectedTrueAndOfferer_Id(Long userId);
 }

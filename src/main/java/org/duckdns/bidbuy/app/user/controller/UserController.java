@@ -146,7 +146,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "내 가격제안 정보 불러오기 API, 최신순 정렬", description = "로그인된 사용자만 내 정보 불러올 수 있음")
+    @Operation(summary = "내 구매내역 정보 불러오기 API, 최신순 정렬", description = "로그인된 사용자만 내 정보 불러올 수 있음")
     @GetMapping(value = "/me/buys/{tradeStatus}/latest")
     public ResponseEntity<ApiResponse<PageResponseDTO<List<MySalesResponse>>>> getUserBuysOrderByLatest(
             @PageableDefault( page=0, size = 4, direction = Sort.Direction.DESC, sort = "createdDate") Pageable pageable,
@@ -157,7 +157,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "내 가격제안 정보 불러오기 API, 높은 가격순 정렬", description = "로그인된 사용자만 내 정보 불러올 수 있음")
+    @Operation(summary = "내 구매내역 정보 불러오기 API, 높은 가격순 정렬", description = "로그인된 사용자만 내 정보 불러올 수 있음")
     @GetMapping(value = "/me/buys/{tradeStatus}/high-price")
     public ResponseEntity<ApiResponse<PageResponseDTO<List<MySalesResponse>>>> getUserBuysOrderByPriceDESC(
             @PageableDefault( page=0, size = 4, direction = Sort.Direction.DESC, sort = "price") Pageable pageable,
@@ -168,7 +168,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "내 가격제안 정보 불러오기 API, 낮은 가격순 정렬", description = "로그인된 사용자만 내 정보 불러올 수 있음")
+    @Operation(summary = "내 구매내역 정보 불러오기 API, 낮은 가격순 정렬", description = "로그인된 사용자만 내 정보 불러올 수 있음")
     @GetMapping(value = "/me/buys/{tradeStatus}/low-price")
     public ResponseEntity<ApiResponse<PageResponseDTO<List<MySalesResponse>>>> getUserBuysOrderByPriceASC(
             @PageableDefault( page=0, size = 4, direction = Sort.Direction.DESC, sort = "price") Pageable pageable,

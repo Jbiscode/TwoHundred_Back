@@ -59,10 +59,12 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
         a.tradeStatus,
         a.createdDate,
         pi.thumbnailUrl,
-        CASE WHEN la.id IS NOT NULL THEN TRUE ELSE FALSE END AS isLiked
+        CASE WHEN la.id IS NOT NULL THEN TRUE ELSE FALSE END AS isLiked,
+        CASE WHEN r.id IS NOT NULL THEN TRUE ELSE FALSE END AS isReviewed
     FROM Article a
     JOIN a.productImages pi
     LEFT JOIN LikeArticle la ON a.id = la.article.id AND la.user.id = :userId
+    LEFT JOIN Review r ON r.id = a.review.id
     WHERE a.id IN (
         SELECT o.article.id
         FROM Offer o
