@@ -8,11 +8,8 @@ import org.duckdns.bidbuy.app.article.exception.LikeArticleNotFoundException;
 import org.duckdns.bidbuy.app.article.repository.ArticleRepository;
 import org.duckdns.bidbuy.app.article.repository.LikeArticleRepository;
 import org.duckdns.bidbuy.app.offer.repository.OfferRepository;
-import org.duckdns.bidbuy.app.user.dto.MyProfileResponse;
+import org.duckdns.bidbuy.app.user.dto.*;
 import org.duckdns.bidbuy.app.user.domain.User;
-import org.duckdns.bidbuy.app.user.dto.MySalesResponse;
-import org.duckdns.bidbuy.app.user.dto.PageResponseDTO;
-import org.duckdns.bidbuy.app.user.dto.UserDto;
 import org.duckdns.bidbuy.app.user.exception.ForbiddenException;
 import org.duckdns.bidbuy.app.user.repository.UserRepository;
 import org.duckdns.bidbuy.global.auth.domain.CustomUserDetails;
@@ -95,7 +92,7 @@ public class UserService {
         Page<Object[]> articles = articleRepository.findByWriterIdAndTradeStatus(userId, status, pageable);
 
         List<MySalesResponse> responses = articles.stream()
-                .map(this::createMySalesResponse)
+                .map(this::createResponse)
                 .toList();
 
         PageResponseDTO pageResponseDTO = new PageResponseDTO(responses, pageable, articles.getTotalElements());
@@ -110,7 +107,7 @@ public class UserService {
 
         Page<Object[]> articles = articleRepository.findArticlesByUserIdWithLikes(userId,pageable);
         List<MySalesResponse> responses = articles.stream()
-                .map(this::createMySalesResponse)
+                .map(this::createResponse)
                 .toList();
 
         PageResponseDTO pageResponseDTO = new PageResponseDTO(responses, pageable, articles.getTotalElements());
@@ -138,7 +135,7 @@ public class UserService {
 
         Page<Object[]> articles = articleRepository.getOfferedArticlesByUserId(userId, pageable);
         List<MySalesResponse> responses = articles.stream()
-                .map(this::createMySalesResponse)
+                .map(this::createResponse)
                 .toList();
         PageResponseDTO pageResponseDTO = new PageResponseDTO(responses, pageable, articles.getTotalElements());
         return pageResponseDTO;
@@ -175,8 +172,8 @@ public class UserService {
         userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 
         Page<Object[]> articles = articleRepository.getOfferedArticlesByUserIdAndIsSelected(userId, pageable);
-        List<MySalesResponse> responses = articles.stream()
-                .map(this::createMySalesResponse)
+        List<MyBuysResponse> responses = articles.stream()
+                .map(this::createBuysResponse)
                 .toList();
         PageResponseDTO pageResponseDTO = new PageResponseDTO(responses, pageable, articles.getTotalElements());
         return pageResponseDTO;
@@ -199,7 +196,7 @@ public class UserService {
     }
 
     // MySalesResponse 객체 생성메서드
-    private MySalesResponse createMySalesResponse(Object[] article) {
+    private MySalesResponse createResponse(Object[] article) {
         Long id = (Long) article[0];
         String title = (String) article[1];
         Integer price = (Integer) article[2];
@@ -215,6 +212,22 @@ public class UserService {
         return new MySalesResponse(id, title, price, addr1, addr2, tradeStatus, timeAgo, thumbnailUrl, isLiked);
     }
 
+    private MyBuysResponse createBuysResponse(Object[] article) {
+        Long id = (Long) article[0];
+        String title = (String) article[1];
+        Integer price = (Integer) article[2];
+        String addr1 = (String) article[3];
+        String addr2 = (String) article[4];
+        TradeStatus tradeStatus = (TradeStatus) article[5];
+        LocalDateTime createdDate = (LocalDateTime) article[6];
+        String thumbnailUrl = (String) article[7];
+        Boolean isLiked = article.length > 8 ? (Boolean) article[8] : null;
+        Boolean isReviewed = article.length > 9 ? (Boolean) article[9] : null;
+
+        String timeAgo = getTimeAgo(createdDate);
+
+        return new MyBuysResponse(id, title, price, addr1, addr2, tradeStatus, timeAgo, thumbnailUrl, isLiked, isReviewed);
+    }
 
 
 }

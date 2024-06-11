@@ -6,7 +6,9 @@ import org.duckdns.bidbuy.app.article.exception.ArticleNoPermitException;
 import org.duckdns.bidbuy.app.article.exception.ArticleNotExistException;
 import org.duckdns.bidbuy.app.article.exception.LikeArticleNotFoundException;
 import org.duckdns.bidbuy.app.article.exception.WriterNotFoundException;
+import org.duckdns.bidbuy.app.offer.exception.OfferNotFoundException;
 import org.duckdns.bidbuy.app.offer.exception.OffererNotFoundException;
+import org.duckdns.bidbuy.app.review.exception.ReviewDuplicateException;
 import org.duckdns.bidbuy.app.user.exception.ForbiddenException;
 import org.duckdns.bidbuy.app.user.exception.PasswordLengthException;
 import org.duckdns.bidbuy.app.user.exception.UserNotFoundException;
@@ -118,5 +120,21 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
                 new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
 
         return new ResponseEntity<>(exceptionResponse, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(OfferNotFoundException.class)
+    public final ResponseEntity<Object> offerNotFoundException(Exception ex, WebRequest request) {
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ReviewDuplicateException.class)
+    public final ResponseEntity<Object> reviewDuplicateException(Exception ex, WebRequest request) {
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.CONFLICT);
     }
 }
