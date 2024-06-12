@@ -154,6 +154,7 @@ public class UserService {
 
         if(likeArticles.isPresent()){
             likeArticleRepository.deleteByArticleIdAndUserId(articleId, userId);
+            article.get().minusLikeCount();
             return "찜한 상품을 목록에서 제거했습니다.";
         }else{
             LikeArticle likeArticle = LikeArticle.builder()
@@ -161,6 +162,7 @@ public class UserService {
                     .article(Article.builder().id(articleId).build())
                     .build();
 
+            article.get().plusLikeCount();
             likeArticleRepository.save(likeArticle);
             return "상품을 찜목록에 등록했습니다.";
         }

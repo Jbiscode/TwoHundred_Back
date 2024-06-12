@@ -77,4 +77,12 @@ public class Article extends BaseEntity {
         this.tradeMethod = tradeMethod;
         this.tradeStatus = tradeStatus;
     }
+
+    public void plusLikeCount() {
+        this.likeCount++;
+    }
+
+    public void minusLikeCount(){
+        this.likeCount--;
+    }
 }
