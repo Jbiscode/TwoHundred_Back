@@ -8,6 +8,12 @@ spring:
     web:
       pageable:
         one-indexed-parameters: true
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+
 
 # entity 이름을 테이블 이름과 동일하게 맞추기 // default = userName -> user_name {설정하면 = userName -> userName}
 #spring.jpa.hibernate.naming.physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl

@@ -1,8 +1,14 @@
 package org.duckdns.bidbuy.global.auth.service;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import lombok.extern.slf4j.Slf4j;
+import org.duckdns.bidbuy.app.article.domain.ProductImage;
+import org.duckdns.bidbuy.app.article.service.ImageUploadService;
 import org.duckdns.bidbuy.app.user.domain.User;
 import org.duckdns.bidbuy.app.user.domain.UserRole;
 import org.duckdns.bidbuy.app.user.exception.PasswordLengthException;
@@ -14,14 +20,17 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
   private final UserRepository userRepository;
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
+  private final ImageUploadService imageUploadService;
 
-  public User createUser(SignupRequest userDTO) {
+  public User createUser(SignupRequest userDTO, List<MultipartFile> list) throws IOException {
     Optional<User> isExist = userRepository.findByEmail(userDTO.getEmail());
 
     if (isExist.isPresent()) {
@@ -39,6 +48,17 @@ public class AuthService {
       throw new PasswordLengthException("비밀번호의 길이가 짧습니다.");
     }
 
+    String imgUrl = "";
+    if(list == null) {
+      imgUrl = "s_uuid_7adc2b20-82c8-4f14-96f0-f68aa2613ac0";
+    }else{
+      MultipartFile[] multipartFiles = list.toArray(new MultipartFile[0]);
+      List<Map<String, String>> uploadimageURL = imageUploadService.uploadImages(multipartFiles);
+      for (int i = 0; i < uploadimageURL.size(); i++) {
+        Map<String, String> imageUrlMap = uploadimageURL.get(i);
+        imgUrl = imageUrlMap.get("thumbnail");
+      }
+    }
 
     User user = User.builder()
                                       .email(userDTO.getEmail())
@@ -49,6 +69,7 @@ public class AuthService {
                                       .addr2(userDTO.getAddr2())
                                       .createdDate(LocalDateTime.now())
                                       .modifiedDate(LocalDateTime.now())
+                                      .profileImageUrl(imgUrl)
                                       .build();
     return userRepository.save(user);
   }
