@@ -13,7 +13,7 @@ import org.duckdns.bidbuy.global.common.response.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -34,7 +34,7 @@ public class RefreshTokenController {
         this.refreshTokenRepository = refreshTokenRepository;
     }
 
-    @PostMapping("/refreshToken")
+    @GetMapping("/refreshToken")
     public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
         log.info("refreshToken 시작");
         //get refresh token
