@@ -41,7 +41,7 @@ public class ArticleRequest {
 
     // 이미 업로드 된 파일의 이름을 저장하는 리스트
     @Builder.Default
-    private List<String> uploadFileNames = new ArrayList<>();
+    private List<String> imageUrls = new ArrayList<>();
 
 
 }
