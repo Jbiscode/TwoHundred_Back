@@ -22,7 +22,4 @@ public class SearchService {
         return searchRepository.search(category, tradeMethod, content, orderBy, page, size);
     }
 
-    public Long totalCount(Category category, TradeMethod tradeMethod, String content) {
-        return searchRepository.totalCount(category, tradeMethod, content);
-    }
 }
