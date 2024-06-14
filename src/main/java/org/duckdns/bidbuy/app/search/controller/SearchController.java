@@ -31,8 +31,8 @@ public class SearchController {
                                                     @RequestParam(required = false) Category category,
                                                     @RequestParam(required = false) TradeMethod tradeMethod,
                                                     @RequestParam(required = false) String orderBy,
-                                                    @RequestParam(defaultValue = "1") int page,
-                                                    @RequestParam(defaultValue = "10") int size) {
+                                                    @RequestParam int page,
+                                                    @RequestParam int size) {
         List<Article> search = searchService.search(category, tradeMethod, content, orderBy, page, size);
         Long totalCount = searchService.totalCount(category, tradeMethod, content);
         List<SearchArticleResponse> searchResult = search.stream()
