@@ -18,24 +18,8 @@ public class SearchService {
 
     private final SearchRepository searchRepository;
 
-    public List<Article> searchAll() {
-        return searchRepository.searchAll();
+    public List<Article> search(Category category, TradeMethod tradeMethod, String content, String orderBy, int page, int size) {
+        return searchRepository.search(category, tradeMethod, content, orderBy, page, size);
     }
 
-    //카테고리&내용 조회
-    public List<Article> search(Category category, TradeMethod tradeMethod, String content) {
-        return searchRepository.search(category, tradeMethod, content);
-    }
-
-    public List<Article> searchOrderByRowPrice(Category category, TradeMethod tradeMethod, String content) {
-        return searchRepository.searchOrderByRowPrice(category, tradeMethod, content);
-    }
-
-    public List<Article> searchOrderByHighPrice(Category category, TradeMethod tradeMethod, String content) {
-        return searchRepository.searchOrderByHighPrice(category, tradeMethod, content);
-    }
-
-    public List<Article> searchOrderByLatest(Category category, TradeMethod tradeMethod, String content) {
-        return searchRepository.searchOrderByLatest(category, tradeMethod, content);
-    }
 }

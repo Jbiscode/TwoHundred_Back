@@ -73,7 +73,7 @@ public class SecurityConfig {
                                 .userService(oAuth2UserService))
                                 .successHandler(oAuthSuccessHandler))
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/api/login","/api/v1/oauth2/redirect/**" ,"/login/oauth2/code/**","/login","/","/user", "/join","/api/v1/auth/**", "/api/v1/users/*/reviews", "/api/v1/users/*", "/api/v1/users/{userId}/{tradeStatus}/{sortBy}**").permitAll()
+                        .requestMatchers("/api/login","/api/v1/oauth2/redirect/**" ,"/login/oauth2/code/**","/login","/","/user", "/join","/api/v1/auth/**", "/api/v1/users/**","api/v1/search/**").permitAll()
                         .requestMatchers("/admin").hasAuthority("ADMIN")  // hasRole("ADMIN") 대신 hasAuthority("ADMIN") 사용
                         .requestMatchers("/api/refreshToken").permitAll()
                         .anyRequest().authenticated())
