@@ -63,7 +63,9 @@ public class SearchRepository {
             cq.orderBy(cb.asc(article.get("price")));
         } else if (orderBy != null && orderBy.equals("highPrice")){
             cq.orderBy(cb.desc(article.get("price")));
-        }
+        } else if (orderBy != null && orderBy.equals("hot")){
+        cq.orderBy(cb.desc(article.get("viewCount")));
+    }
 
         TypedQuery<Article> query = em.createQuery(cq);
 
@@ -74,6 +76,40 @@ public class SearchRepository {
 
 
         return query.getResultList();
+    }
+
+    @Transactional(readOnly = true)
+    public long totalCount(Category category, TradeMethod tradeMethod, String content) {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+        Root<Article> article = cq.from(Article.class);
+
+        List<Predicate> predicates = new ArrayList<>();
+
+        // 카테고리
+        if (category != null) {
+            predicates.add(cb.equal(article.get("category"), category));
+        }
+
+        // 거래 방식
+        if (tradeMethod != null) {
+            predicates.add(cb.equal(article.get("tradeMethod"), tradeMethod));
+        }
+
+        // 검색 내용
+        if (content != null && !content.trim().isEmpty()) {
+            String contentPattern = "%" + content + "%";
+            Predicate contentPredicate = cb.or(
+                    cb.like(article.get("title"), contentPattern),
+                    cb.like(article.get("addr1"), contentPattern),
+                    cb.like(article.get("addr2"), contentPattern)
+            );
+            predicates.add(contentPredicate);
+        }
+
+        cq.select(cb.count(article)).where(predicates.toArray(new Predicate[0]));
+
+        return em.createQuery(cq).getSingleResult();
     }
 
 }
