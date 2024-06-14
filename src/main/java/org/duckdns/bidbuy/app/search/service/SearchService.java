@@ -18,8 +18,8 @@ public class SearchService {
 
     private final SearchRepository searchRepository;
 
-    public List<Article> search(Category category, TradeMethod tradeMethod, String content, String orderBy) {
-        return searchRepository.search(category, tradeMethod, content, orderBy);
+    public List<Article> search(Category category, TradeMethod tradeMethod, String content, String orderBy, int page, int size) {
+        return searchRepository.search(category, tradeMethod, content, orderBy, page, size);
     }
 
 }

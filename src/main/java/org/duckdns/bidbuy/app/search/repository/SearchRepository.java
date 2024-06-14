@@ -23,7 +23,7 @@ public class SearchRepository {
     private final EntityManager em;
 
     @Transactional(readOnly = true)
-    public List<Article> search(Category category, TradeMethod tradeMethod, String content, String orderBy) {
+    public List<Article> search(Category category, TradeMethod tradeMethod, String content, String orderBy, int page, int size) {
         em.flush();
         em.clear();
 
@@ -66,6 +66,13 @@ public class SearchRepository {
         }
 
         TypedQuery<Article> query = em.createQuery(cq);
+
+        // 페이징
+        int startIndex = (page - 1) * size;
+        query.setFirstResult(startIndex);
+        query.setMaxResults(size);
+
+
         return query.getResultList();
     }
 
