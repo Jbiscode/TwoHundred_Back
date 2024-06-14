@@ -10,6 +10,7 @@ import org.duckdns.bidbuy.app.offer.exception.OfferNotFoundException;
 import org.duckdns.bidbuy.app.offer.exception.OffererNotFoundException;
 import org.duckdns.bidbuy.app.review.exception.ReviewDuplicateException;
 import org.duckdns.bidbuy.app.user.exception.ForbiddenException;
+import org.duckdns.bidbuy.app.user.exception.NotLoggedInException;
 import org.duckdns.bidbuy.app.user.exception.PasswordLengthException;
 import org.duckdns.bidbuy.app.user.exception.UserNotFoundException;
 import org.duckdns.bidbuy.global.auth.exception.DuplicateIdExistException;
@@ -136,5 +137,13 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
                 new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
 
         return new ResponseEntity<>(exceptionResponse, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(NotLoggedInException.class)
+    public final ResponseEntity<Object> NotLoggedInException(Exception ex, WebRequest request) {
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.UNAUTHORIZED);
     }
 }

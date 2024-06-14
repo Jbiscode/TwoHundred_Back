@@ -29,8 +29,9 @@ public class MyProfileResponse {
     private int countLike;
     private int countOffer;
     private int countBuy;
+    private int countReview;
 
-    public static MyProfileResponse from(UserDto userDto, int countSale, int countLike, int countOffer, int countBuy) {
+    public static MyProfileResponse from(UserDto userDto, int countSale, int countLike, int countOffer, int countBuy, int countReview) {
         return new MyProfileResponse(
                 userDto.getId(),
                 userDto.getEmail(),
@@ -47,7 +48,8 @@ public class MyProfileResponse {
                 countSale,
                 countLike,
                 countOffer,
-                countBuy
+                countBuy,
+                countReview
         );
     }
 

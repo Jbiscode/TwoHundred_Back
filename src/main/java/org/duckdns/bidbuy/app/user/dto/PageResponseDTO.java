@@ -10,7 +10,7 @@ import java.util.stream.IntStream;
 @Data
 public class PageResponseDTO<E> {
 
-    private List<MySalesResponse> mySalesResponses;
+    private List<E> mySalesResponses;
 
     private Pageable pageable;
 
@@ -20,7 +20,7 @@ public class PageResponseDTO<E> {
 
     private int totalCount, prevPage, nextPage, totalPage, current;
 
-    public PageResponseDTO(List<MySalesResponse> mySalesResponses, Pageable pageable, long total) {
+    public PageResponseDTO(List<E> mySalesResponses, Pageable pageable, long total) {
         this.mySalesResponses = mySalesResponses;
         this.pageable = pageable;
         this.totalCount = (int) total;

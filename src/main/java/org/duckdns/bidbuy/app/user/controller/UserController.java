@@ -4,6 +4,8 @@ package org.duckdns.bidbuy.app.user.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.duckdns.bidbuy.app.article.domain.TradeStatus;
+import org.duckdns.bidbuy.app.review.dto.ReviewResponse;
+import org.duckdns.bidbuy.app.review.service.ReviewService;
 import org.duckdns.bidbuy.app.user.dto.MyProfileResponse;
 import org.duckdns.bidbuy.app.user.dto.MySalesResponse;
 import org.duckdns.bidbuy.app.user.dto.PageResponseDTO;
@@ -29,14 +31,37 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final ReviewService reviewService;
 
     @Operation(summary = "내 정보 불러오기 API", description = "로그인된 사용자만 내 정보 불러올 수 있음")
     @GetMapping(value = "/me")
-    public ResponseEntity<ApiResponse<?>> getUser() {
+    public ResponseEntity<ApiResponse<?>> getMe() {
         MyProfileResponse responseDTO = userService.getMyProfile();
         ApiResponse<MyProfileResponse> response = new ApiResponse<>("200", "마이페이지 정보를 불러오는데 성공하였습니다.", responseDTO);
         return ResponseEntity.ok(response);
     }
+
+    @Operation(summary = "유저 정보 불러오기 API", description = "다른 유저의 프로필 정보 불러오기")
+    @GetMapping(value = "/{userId}")
+    public ResponseEntity<ApiResponse<?>> getUser(@PathVariable(name = "userId") Long userId) {
+        MyProfileResponse responseDTO = userService.getUserProfile(userId);
+        ApiResponse<MyProfileResponse> response = new ApiResponse<>("200", "마이페이지 정보를 불러오는데 성공하였습니다.", responseDTO);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "다른 사용자 판매상품 정보 불러오기 API, 최신순 정렬", description = "다른 사용자의 판매상품 정보 불러오기")
+    @GetMapping(value = "/{userId}/{tradeStatus}/latest")
+    public ResponseEntity<ApiResponse<PageResponseDTO<List<MySalesResponse>>>> getUserSalesOrderByLatest(
+            @PathVariable(name = "userId") Long userId,
+            @PageableDefault( page=0, size = 4, direction = Sort.Direction.DESC, sort = "createdDate") Pageable pageable,
+            @PathVariable(name = "tradeStatus") TradeStatus tradeStatus) {
+        log.error("다른사용자판매상품 컨트롤러1");
+        // batch
+        PageResponseDTO<List<MySalesResponse>> responseDTO = userService.getUserSales(userId,tradeStatus, pageable);
+        ApiResponse<PageResponseDTO<List<MySalesResponse>>> response = new ApiResponse<>("200", "판매중인 상품목록을 불러오는데 성공하였습니다.", responseDTO);
+        return ResponseEntity.ok(response);
+    }
+
 
     @Operation(summary = "내 판매상품 정보 불러오기 API, 최신순 정렬", description = "로그인된 사용자만 내 정보 불러올 수 있음")
     @GetMapping(value = "/me/{tradeStatus}/latest")
@@ -178,4 +203,19 @@ public class UserController {
         ApiResponse<PageResponseDTO<List<MySalesResponse>>> response = new ApiResponse<>("200", "구매내역을 불러오는데 성공하였습니다.", responseDTO);
         return ResponseEntity.ok(response);
     }
+
+
+    @Operation(summary = "리뷰 목록 조회 API", description = "다른 사람의 프로필페이지에서 리뷰 목록 조회")
+    @GetMapping(value = "/{userId}/reviews")
+    public ResponseEntity<ApiResponse<?>> getUserReviews(
+            @PathVariable(name = "userId") Long userId,
+            @RequestParam(name = "status") String status,
+            @PageableDefault( page=0, size = 4, direction = Sort.Direction.DESC, sort = "createdDate") Pageable pageable) {
+
+        PageResponseDTO<List<ReviewResponse>> responseDTO = reviewService.getReviews(userId, status, pageable);
+        ApiResponse<PageResponseDTO<List<ReviewResponse>>> response = new ApiResponse<>("200", "리뷰내역을 불러오는데 성공했습니다.", responseDTO);
+        return ResponseEntity.ok(response);
+    }
+
+
 }

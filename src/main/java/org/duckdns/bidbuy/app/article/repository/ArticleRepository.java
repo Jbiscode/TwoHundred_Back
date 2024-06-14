@@ -21,6 +21,19 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
             "WHERE a.writer.id = :userId AND a.tradeStatus = :tradeStatus AND pi.thumbnailUrl is not null")
     Page<Object[]> findByWriterIdAndTradeStatus(@Param("userId") Long userId, @Param("tradeStatus") TradeStatus tradeStatus, Pageable pageable);
 
+    @Query("SELECT a.id, a.title, a.price, a.addr1, a.addr2, a.tradeStatus, a.createdDate ,pi.thumbnailUrl, FALSE AS isLiked " +
+            "FROM Article a " +
+            "LEFT JOIN a.productImages pi " +
+            "WHERE a.writer.id = :userId AND a.tradeStatus = :tradeStatus AND pi.thumbnailUrl is not null")
+    Page<Object[]> findByWriterIdAndTradeStatusUser(@Param("userId") Long userId, @Param("tradeStatus") TradeStatus tradeStatus, Pageable pageable);
+
+    @Query("SELECT a.id, a.title, a.price, a.addr1, a.addr2, a.tradeStatus, a.createdDate ,pi.thumbnailUrl, CASE WHEN la.id IS NOT NULL THEN TRUE ELSE FALSE END AS isLiked " +
+            "FROM Article a " +
+            "LEFT JOIN a.productImages pi " +
+            "LEFT JOIN LikeArticle la ON a.id = la.article.id AND la.user.id = :loggedInUserId " +
+            "WHERE a.writer.id = :userId AND a.tradeStatus = :tradeStatus AND pi.thumbnailUrl is not null")
+    Page<Object[]> findByWriterIdAndTradeStatusUserLoggedIn(@Param("userId") Long userId, @Param("loggedInUserId") Long loggedInUserId,@Param("tradeStatus") TradeStatus tradeStatus, Pageable pageable);
+
     @Query("SELECT a.id, a.title, a.price, a.addr1, a.addr2, a.tradeStatus, a.createdDate, pi.thumbnailUrl " +
             "FROM Article a " +
             "LEFT JOIN a.productImages pi " +
