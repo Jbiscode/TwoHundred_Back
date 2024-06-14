@@ -8,6 +8,7 @@ import org.duckdns.bidbuy.app.article.domain.LikeArticle;
 import org.duckdns.bidbuy.app.offer.domain.Offer;
 import org.duckdns.bidbuy.app.review.domain.Review;
 import org.duckdns.bidbuy.global.common.entity.BaseEntity;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,8 @@ public class User extends BaseEntity {
     private String providerId;
     private String profileImageUrl;
     private Integer score;
+
+    @ColumnDefault("1")
     private Integer offerLevel;
 
     @Enumerated(EnumType.STRING)

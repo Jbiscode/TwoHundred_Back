@@ -8,9 +8,11 @@ import org.duckdns.bidbuy.app.article.exception.LikeArticleNotFoundException;
 import org.duckdns.bidbuy.app.article.repository.ArticleRepository;
 import org.duckdns.bidbuy.app.article.repository.LikeArticleRepository;
 import org.duckdns.bidbuy.app.offer.repository.OfferRepository;
+import org.duckdns.bidbuy.app.review.repository.ReviewRepository;
 import org.duckdns.bidbuy.app.user.dto.*;
 import org.duckdns.bidbuy.app.user.domain.User;
 import org.duckdns.bidbuy.app.user.exception.ForbiddenException;
+import org.duckdns.bidbuy.app.user.exception.NotLoggedInException;
 import org.duckdns.bidbuy.app.user.repository.UserRepository;
 import org.duckdns.bidbuy.global.auth.domain.CustomUserDetails;
 import org.springframework.data.domain.Page;
@@ -32,10 +34,11 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-  private final UserRepository userRepository;
-  private final ArticleRepository articleRepository;
-  private final LikeArticleRepository likeArticleRepository;
-  private final OfferRepository offerRepository;
+    private final UserRepository userRepository;
+    private final ArticleRepository articleRepository;
+    private final LikeArticleRepository likeArticleRepository;
+    private final OfferRepository offerRepository;
+    private final ReviewRepository reviewRepository;
 
 
     public MyProfileResponse getMyProfile() {
@@ -79,8 +82,37 @@ public class UserService {
         int countLike = likeArticleRepository.countByUser_id(userId);
         int countOffer = offerRepository.countByOfferer_id(userId);
         int countBuy = offerRepository.countBuy(userId);
+        int countReview = reviewRepository.countByRevieweeIdOrReviewerId(userId,userId);
 
-        return  MyProfileResponse.from(userDto, countSale, countLike, countOffer, countBuy);
+        return  MyProfileResponse.from(userDto, countSale, countLike, countOffer, countBuy,countReview);
+    }
+
+    public MyProfileResponse getUserProfile(Long userId) {
+
+        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+
+        UserDto userDto = UserDto.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .username(user.getUsername())
+                .name(user.getName())
+                .addr1(user.getAddr1())
+                .addr2(user.getAddr2())
+                .provider(user.getProvider())
+                .providerId(user.getProviderId())
+                .profileImageUrl(user.getProfileImageUrl())
+                .score(user.getScore())
+                .offerLevel(user.getOfferLevel())
+                .role(user.getRole())
+                .build();
+
+        int countSale = articleRepository.countByWriter_Id(userId);
+        int countLike = likeArticleRepository.countByUser_id(userId);
+        int countOffer = offerRepository.countByOfferer_id(userId);
+        int countBuy = offerRepository.countBuy(userId);
+        int countReview = reviewRepository.countByRevieweeIdOrReviewerId(userId,userId);
+
+        return  MyProfileResponse.from(userDto, countSale, countLike, countOffer, countBuy,countReview);
     }
 
 
@@ -91,6 +123,35 @@ public class UserService {
 
         Page<Object[]> articles = articleRepository.findByWriterIdAndTradeStatus(userId, status, pageable);
 
+        List<MySalesResponse> responses = articles.stream()
+                .map(this::createResponse)
+                .toList();
+
+        PageResponseDTO pageResponseDTO = new PageResponseDTO(responses, pageable, articles.getTotalElements());
+
+        return pageResponseDTO;
+    }
+
+    public PageResponseDTO<List<MySalesResponse>> getUserSales(Long userId, TradeStatus tradeStatus, Pageable pageable) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+        Page<Object[]> articles = null;
+
+        try {
+            var principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            log.info("Principal: " + principal);
+            if (principal instanceof CustomUserDetails customUserDetails) {
+                Long loggedInUserId = customUserDetails.getUser().getId();
+                    log.info("로그인 상태.");
+                articles = articleRepository.findByWriterIdAndTradeStatusUserLoggedIn(userId, loggedInUserId, tradeStatus, pageable);
+            }else if(principal instanceof String){
+                log.info("로그인되지 않았습니다.");
+                articles = articleRepository.findByWriterIdAndTradeStatusUser(userId, tradeStatus, pageable);
+            }
+
+        } catch (Exception e) {
+            log.error("Error getting user sales: {}", e.getMessage());
+            throw new RuntimeException("Error getting user sales", e);
+        }
         List<MySalesResponse> responses = articles.stream()
                 .map(this::createResponse)
                 .toList();
@@ -143,8 +204,18 @@ public class UserService {
 
     @Transactional
     public String updateLikeArticles(Long articleId) {
-        CustomUserDetails principal = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Long userId = principal.getUser().getId();
+
+
+        var principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        log.info("Principal: " + principal);
+        Long userId = null;
+        if (principal instanceof CustomUserDetails customUserDetails) {
+            userId = customUserDetails.getUser().getId();
+            log.info("로그인 상태.");
+        }else if(principal instanceof String) {
+            throw new NotLoggedInException("찜하려면 로그인 하세요");
+        }
+
         userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 
         Optional<LikeArticle> likeArticles = likeArticleRepository.findByArticleIdAndUserId(articleId, userId);
@@ -230,6 +301,7 @@ public class UserService {
 
         return new MyBuysResponse(id, title, price, addr1, addr2, tradeStatus, timeAgo, thumbnailUrl, isLiked, isReviewed);
     }
+
 
 
 }
