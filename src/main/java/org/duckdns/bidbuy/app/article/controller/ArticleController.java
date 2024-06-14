@@ -31,8 +31,11 @@ public class ArticleController {
 
     @Operation(summary = "게시글 작성 API", description = "로그인된 사용자만 작성가능, 이미지 최소 1개 필수")
     @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<ApiResponse<ArticleResponse>> createArticle(@ModelAttribute ArticleRequest requestDTO) throws IOException {
-        ArticleResponse responseDTO = articleService.createArticle(requestDTO, requestDTO.getFiles().toArray(new MultipartFile[0]));
+    public ResponseEntity<ApiResponse<ArticleResponse>> createArticle(
+            @RequestPart("articleRequestDTO") ArticleRequest requestDTO,
+            @RequestPart(value = "files", required = false) MultipartFile[] files
+    ) throws IOException {
+        ArticleResponse responseDTO = articleService.createArticle(requestDTO, files);
         ApiResponse<ArticleResponse> response = new ApiResponse<>("201", "게시글이 성공적으로 생성되었습니다.", responseDTO);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{articleId}")
