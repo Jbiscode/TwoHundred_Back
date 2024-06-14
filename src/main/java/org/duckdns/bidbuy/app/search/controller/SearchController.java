@@ -27,12 +27,14 @@ public class SearchController {
     public ResponseEntity<ApiResponse<List>> search(@RequestParam(required = false) String content,
                                                     @RequestParam(required = false) Category category,
                                                     @RequestParam(required = false) TradeMethod tradeMethod,
-                                                    @RequestParam(required = false) String orderBy) {
-        List<Article> search = searchService.search(category, tradeMethod, content, orderBy);
+                                                    @RequestParam(required = false) String orderBy,
+                                                    @RequestParam(defaultValue = "1") int page,
+                                                    @RequestParam(defaultValue = "10") int size) {
+        List<Article> search = searchService.search(category, tradeMethod, content, orderBy, page, size);
         List<SearchArticleResponse> result = search.stream()
                 .map(s -> new SearchArticleResponse(s))
                 .collect(toList());
-        ApiResponse<List> response = new ApiResponse<>("200", "검색결과 페이지: 내용&키테고리 조회 완료", result);
+        ApiResponse<List> response = new ApiResponse<>("200", "검색결과 페이지 조회 완료", result);
         return ResponseEntity.ok(response);
     }
 
