@@ -21,4 +21,6 @@ public class ReviewResponse {
 
     private String content; // review
     private String timeAgo; // review
+
+    private Integer score;
 }

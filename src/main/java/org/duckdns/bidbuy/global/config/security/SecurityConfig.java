@@ -13,6 +13,7 @@ import org.duckdns.bidbuy.global.auth.oauth.OAuthSuccessHandler;
 import org.duckdns.bidbuy.global.auth.service.OAuth2UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.access.expression.SecurityExpressionHandler;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -73,6 +74,7 @@ public class SecurityConfig {
                                 .userService(oAuth2UserService))
                                 .successHandler(oAuthSuccessHandler))
                 .authorizeHttpRequests((auth) -> auth
+                        .requestMatchers(HttpMethod.GET, "/api/v1/reviews/**").permitAll()
                         .requestMatchers("/api/login","/api/v1/oauth2/redirect/**" ,"/login/oauth2/code/**","/login","/","/user", "/join","/api/v1/auth/**", "/api/v1/users/**","api/v1/search/**").permitAll()
                         .requestMatchers("/admin").hasAuthority("ADMIN")  // hasRole("ADMIN") 대신 hasAuthority("ADMIN") 사용
                         .requestMatchers("/api/refreshToken").permitAll()

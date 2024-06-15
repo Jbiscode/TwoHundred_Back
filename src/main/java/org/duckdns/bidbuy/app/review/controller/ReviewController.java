@@ -5,10 +5,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.duckdns.bidbuy.app.review.domain.Review;
 import org.duckdns.bidbuy.app.review.dto.ReviewRequest;
+import org.duckdns.bidbuy.app.review.dto.ReviewResponse;
 import org.duckdns.bidbuy.app.review.service.ReviewService;
 import org.duckdns.bidbuy.global.common.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -26,6 +29,14 @@ public class ReviewController {
 
 
         return ResponseEntity.ok(new ApiResponse<>("201", message, null));
+    }
+
+    @Operation(summary = "리뷰 조회하기 API", description = "해당 게시글의 리뷰 조회")
+    @GetMapping(value = "/{articleId}")
+    public ResponseEntity<ApiResponse<?>> getReviews(@PathVariable Long articleId) {
+         ReviewResponse reviewResponse = reviewService.getReview(articleId);
+
+         return ResponseEntity.ok(new ApiResponse<>("200", "리뷰 내용을 불러오는데 성공했습니다.", reviewResponse));
     }
 
 }
