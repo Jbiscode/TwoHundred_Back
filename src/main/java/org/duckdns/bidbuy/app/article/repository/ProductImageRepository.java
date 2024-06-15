@@ -9,4 +9,5 @@ import java.util.List;
 public interface ProductImageRepository extends JpaRepository<ProductImage, Long> {
     void deleteByArticle(Article article);
     List<ProductImage> findByArticle(Article article);
+    ProductImage findByImageUrl(String imageUrl);
 }

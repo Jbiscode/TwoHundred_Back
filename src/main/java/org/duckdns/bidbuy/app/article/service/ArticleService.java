@@ -88,69 +88,143 @@ public class ArticleService {
     }
 
 
-@Transactional
-public ArticleResponse updateArticle(Long id, ArticleRequest requestDTO, MultipartFile[] images) throws IOException {
-    CustomUserDetails principal = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    Long userId = principal.getUser().getId();
+    @Transactional
+    public ArticleResponse updateArticle(Long id, ArticleRequest requestDTO, MultipartFile[] images) throws IOException {
+        CustomUserDetails principal = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = principal.getUser().getId();
 
-    Article article = articleRepository.findById(id).orElseThrow(() -> new ArticleNotExistException(id));
+        Article article = articleRepository.findById(id).orElseThrow(() -> new ArticleNotExistException(id));
 
-    if(!article.getWriter().getId().equals(userId)) {
-        throw new ArticleNoPermitException(userId);
-    }
+        if (!article.getWriter().getId().equals(userId)) {
+            throw new ArticleNoPermitException(userId);
+        }
 
-    // 게시글 업데이트
-    Article updatedArticle = Article.builder()
-            .id(id)
-            .title(requestDTO.getTitle() != null ? requestDTO.getTitle() : article.getTitle())
-            .content(requestDTO.getContent() != null ? requestDTO.getContent() : article.getContent())
-            .price(requestDTO.getPrice() != null ? requestDTO.getPrice() : article.getPrice())
-            .quantity(requestDTO.getQuantity() != null ? requestDTO.getQuantity() : article.getQuantity())
-            .addr1(requestDTO.getAddr1() != null ? requestDTO.getAddr1() : article.getAddr1())
-            .addr2(requestDTO.getAddr2() != null ? requestDTO.getAddr2() : article.getAddr2())
-            .category(requestDTO.getCategory() != null ? requestDTO.getCategory() : article.getCategory())
-            .tradeMethod(requestDTO.getTradeMethod() != null ? requestDTO.getTradeMethod() : article.getTradeMethod())
-            .tradeStatus(requestDTO.getTradeStatus() != null ? requestDTO.getTradeStatus() : article.getTradeStatus())
-            .viewCount(article.getViewCount())
-            .likeCount(article.getLikeCount())
-            .createdDate(article.getCreatedDate())
-            .modifiedDate(LocalDateTime.now())
-            .writer(article.getWriter())
-            .build();
-    articleRepository.save(updatedArticle);
+        Article updatedArticle = Article.builder()
+                .id(id)
+                .title(requestDTO.getTitle() != null ? requestDTO.getTitle() : article.getTitle())
+                .content(requestDTO.getContent() != null ? requestDTO.getContent() : article.getContent())
+                .price(requestDTO.getPrice() != null ? requestDTO.getPrice() : article.getPrice())
+                .quantity(requestDTO.getQuantity() != null ? requestDTO.getQuantity() : article.getQuantity())
+                .addr1(requestDTO.getAddr1() != null ? requestDTO.getAddr1() : article.getAddr1())
+                .addr2(requestDTO.getAddr2() != null ? requestDTO.getAddr2() : article.getAddr2())
+                .category(requestDTO.getCategory() != null ? requestDTO.getCategory() : article.getCategory())
+                .tradeMethod(requestDTO.getTradeMethod() != null ? requestDTO.getTradeMethod() : article.getTradeMethod())
+                .tradeStatus(requestDTO.getTradeStatus() != null ? requestDTO.getTradeStatus() : article.getTradeStatus())
+                .viewCount(article.getViewCount())
+                .likeCount(article.getLikeCount())
+                .createdDate(article.getCreatedDate())
+                .modifiedDate(LocalDateTime.now())
+                .writer(article.getWriter())
+                .build();
+        articleRepository.save(updatedArticle);
 
-    // 이미지 변경이 있는 경우에만 기존 이미지 삭제 및 새 이미지 업로드
-    if (images != null && images.length > 0) {
         List<ProductImage> existingImages = productImageRepository.findByArticle(article);
-        for (ProductImage productImage : existingImages) {
-            imageUploadService.deleteImage(productImage.getImageUrl());
-            if (productImage.getThumbnailUrl() != null) {
-                imageUploadService.deleteImage(productImage.getThumbnailUrl());
+        List<String> existingImageUrls = existingImages.stream()
+                .map(ProductImage::getImageUrl)
+                .collect(Collectors.toList());
+
+        List<String> newImageUrls = requestDTO.getImageUrls();
+
+        // 삭제된 이미지 URL 확인 및 삭제 처리
+        List<String> deletedImageUrls = existingImageUrls.stream()
+                .filter(url -> !newImageUrls.contains(url))
+                .collect(Collectors.toList());
+
+        for (String deletedImageUrl : deletedImageUrls) {
+            imageUploadService.deleteImage(deletedImageUrl);
+            ProductImage productImage = productImageRepository.findByImageUrl(deletedImageUrl);
+            if (productImage != null) {
+                productImageRepository.delete(productImage);
             }
         }
-        productImageRepository.deleteAll(existingImages);
 
-        List<Map<String, String>> imageUrlMaps = imageUploadService.uploadImages(images);
-        for (int i = 0; i < imageUrlMaps.size(); i++) {
-            Map<String, String> imageUrlMap = imageUrlMaps.get(i);
-            ProductImage.ProductImageBuilder productImageBuilder = ProductImage.builder()
-                    .imageUrl(imageUrlMap.get("original"))
-                    .article(updatedArticle)
-                    .createdDate(LocalDateTime.now())
-                    .modifiedDate(LocalDateTime.now());
+        // 새로 추가된 이미지 파일 업로드 및 저장 처리
+        if (images != null && images.length > 0) {
+            List<Map<String, String>> imageUrlMaps = imageUploadService.uploadImages(images);
+            for (int i = 0; i < imageUrlMaps.size(); i++) {
+                Map<String, String> imageUrlMap = imageUrlMaps.get(i);
+                ProductImage.ProductImageBuilder productImageBuilder = ProductImage.builder()
+                        .imageUrl(imageUrlMap.get("original"))
+                        .article(updatedArticle)
+                        .createdDate(LocalDateTime.now())
+                        .modifiedDate(LocalDateTime.now());
 
-            // 첫 번째 이미지인 경우에만 썸네일 URL 설정
-            if (i == 0 && imageUrlMap.containsKey("thumbnail")) {
-                productImageBuilder.thumbnailUrl(imageUrlMap.get("thumbnail"));
+                // 첫 번째 이미지인 경우에만 썸네일 URL 설정
+                if (i == 0 && imageUrlMap.containsKey("thumbnail")) {
+                    productImageBuilder.thumbnailUrl(imageUrlMap.get("thumbnail"));
+                }
+
+                ProductImage productImage = productImageBuilder.build();
+                productImageRepository.save(productImage);
             }
-
-            ProductImage productImage = productImageBuilder.build();
-            productImageRepository.save(productImage);
         }
+
+        return ArticleResponse.from(updatedArticle);
     }
 
-    return ArticleResponse.from(updatedArticle);
-}
+//@Transactional
+//public ArticleResponse updateArticle(Long id, ArticleRequest requestDTO, MultipartFile[] images) throws IOException {
+//    CustomUserDetails principal = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+//    Long userId = principal.getUser().getId();
+//
+//    Article article = articleRepository.findById(id).orElseThrow(() -> new ArticleNotExistException(id));
+//
+//    if(!article.getWriter().getId().equals(userId)) {
+//        throw new ArticleNoPermitException(userId);
+//    }
+//
+//    // 게시글 업데이트
+//    Article updatedArticle = Article.builder()
+//            .id(id)
+//            .title(requestDTO.getTitle() != null ? requestDTO.getTitle() : article.getTitle())
+//            .content(requestDTO.getContent() != null ? requestDTO.getContent() : article.getContent())
+//            .price(requestDTO.getPrice() != null ? requestDTO.getPrice() : article.getPrice())
+//            .quantity(requestDTO.getQuantity() != null ? requestDTO.getQuantity() : article.getQuantity())
+//            .addr1(requestDTO.getAddr1() != null ? requestDTO.getAddr1() : article.getAddr1())
+//            .addr2(requestDTO.getAddr2() != null ? requestDTO.getAddr2() : article.getAddr2())
+//            .category(requestDTO.getCategory() != null ? requestDTO.getCategory() : article.getCategory())
+//            .tradeMethod(requestDTO.getTradeMethod() != null ? requestDTO.getTradeMethod() : article.getTradeMethod())
+//            .tradeStatus(requestDTO.getTradeStatus() != null ? requestDTO.getTradeStatus() : article.getTradeStatus())
+//            .viewCount(article.getViewCount())
+//            .likeCount(article.getLikeCount())
+//            .createdDate(article.getCreatedDate())
+//            .modifiedDate(LocalDateTime.now())
+//            .writer(article.getWriter())
+//            .build();
+//    articleRepository.save(updatedArticle);
+//
+//    // 이미지 변경이 있는 경우에만 기존 이미지 삭제 및 새 이미지 업로드
+//    if (images != null && images.length > 0) {
+//        List<ProductImage> existingImages = productImageRepository.findByArticle(article);
+//        for (ProductImage productImage : existingImages) {
+//            imageUploadService.deleteImage(productImage.getImageUrl());
+//            if (productImage.getThumbnailUrl() != null) {
+//                imageUploadService.deleteImage(productImage.getThumbnailUrl());
+//            }
+//        }
+//        productImageRepository.deleteAll(existingImages);
+//
+//        List<Map<String, String>> imageUrlMaps = imageUploadService.uploadImages(images);
+//        for (int i = 0; i < imageUrlMaps.size(); i++) {
+//            Map<String, String> imageUrlMap = imageUrlMaps.get(i);
+//            ProductImage.ProductImageBuilder productImageBuilder = ProductImage.builder()
+//                    .imageUrl(imageUrlMap.get("original"))
+//                    .article(updatedArticle)
+//                    .createdDate(LocalDateTime.now())
+//                    .modifiedDate(LocalDateTime.now());
+//
+//            // 첫 번째 이미지인 경우에만 썸네일 URL 설정
+//            if (i == 0 && imageUrlMap.containsKey("thumbnail")) {
+//                productImageBuilder.thumbnailUrl(imageUrlMap.get("thumbnail"));
+//            }
+//
+//            ProductImage productImage = productImageBuilder.build();
+//            productImageRepository.save(productImage);
+//        }
+//    }
+//
+//    return ArticleResponse.from(updatedArticle);
+//}
 
     @Transactional
     public void deleteArticle(Long id) {
