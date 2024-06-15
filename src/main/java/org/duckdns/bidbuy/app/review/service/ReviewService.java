@@ -91,6 +91,23 @@ public class ReviewService {
 
     }
 
+    public ReviewResponse getReview(Long articleId) {
+        Review review = reviewRepository.findByArticleId(articleId);
+
+        return ReviewResponse.builder()
+                .reviewId(review.getId())
+                .content(review.getContent())
+                .articleTitle(review.getArticle().getTitle())
+                .timeAgo(getTimeAgo(review.getCreatedDate()))
+                .articleId(review.getArticle().getId())
+                .reviewerName(review.getReviewer().getUsername())
+                .reviewerLevel(review.getReviewer().getOfferLevel())
+                .revieweeName(review.getReviewee().getUsername())
+                .revieweeLevel(review.getReviewee().getOfferLevel())
+                .score(review.getScore())
+                .build();
+    }
+
     private ReviewResponse createResponse(Object[] reviews) {
         Long reviewId = (Long) reviews[0];
         String content = (String) reviews[1];
@@ -101,10 +118,11 @@ public class ReviewService {
         Integer reviewerLevel = (Integer) reviews[6];
         String revieweeName = (String) reviews[7];
         Integer revieweeLevel = (Integer) reviews[8];
+        Integer score = reviews.length > 9 ? (Integer) reviews[9] :  null;
 
         String timeAgo = getTimeAgo(createdDate);
 
-        return new ReviewResponse(reviewId, articleId, articleTitle, reviewerName,revieweeName,reviewerLevel,revieweeLevel,content,timeAgo);
+        return new ReviewResponse(reviewId, articleId, articleTitle, reviewerName,revieweeName,reviewerLevel,revieweeLevel,content,timeAgo,score);
     }
 
     // 현재 시간과의 차이 계산
@@ -122,4 +140,6 @@ public class ReviewService {
             return (int) (seconds / 86400) + "일 전";
         }
     }
+
+
 }

@@ -74,6 +74,7 @@ public class SecurityConfig {
                                 .userService(oAuth2UserService))
                                 .successHandler(oAuthSuccessHandler))
                 .authorizeHttpRequests((auth) -> auth
+                        .requestMatchers(HttpMethod.GET, "/api/v1/reviews/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/articles/**").permitAll()
                         .requestMatchers("/api/login","/api/v1/oauth2/redirect/**" ,"/login/oauth2/code/**","/login","/","/user", "/join","/api/v1/auth/**", "/api/v1/users/**","api/v1/search/**").permitAll()
                         .requestMatchers("/admin").hasAuthority("ADMIN")  // hasRole("ADMIN") 대신 hasAuthority("ADMIN") 사용
