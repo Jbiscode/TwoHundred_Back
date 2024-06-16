@@ -116,12 +116,25 @@ public class UserService {
     }
 
 
-    public PageResponseDTO getMySales(TradeStatus status, Pageable pageable) {
+    public PageResponseDTO getMySales(String sorting,TradeStatus status, Pageable pageable) {
         CustomUserDetails principal = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = principal.getUser().getId();
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 
-        Page<Object[]> articles = articleRepository.findByWriterIdAndTradeStatus(userId, status, pageable);
+        Page<Object[]> articles;
+        switch (sorting) {
+            case "latest":
+                articles = articleRepository.findByWriterIdAndTradeStatus(userId, status, pageable);
+                break;
+            case "high-price":
+                articles = articleRepository.findByWriterIdAndTradeStatusOrderByPriceDESC(userId, status, pageable);
+                break;
+            case "low-price":
+                articles =  articleRepository.findByWriterIdAndTradeStatusOrderByPriceASC(userId, status, pageable);
+                break;
+            default:
+                articles = articleRepository.findByWriterIdAndTradeStatus(userId, status, pageable);
+        }
 
         List<MySalesResponse> responses = articles.stream()
                 .map(this::createResponse)
@@ -132,7 +145,7 @@ public class UserService {
         return pageResponseDTO;
     }
 
-    public PageResponseDTO<List<MySalesResponse>> getUserSales(Long userId, TradeStatus tradeStatus, Pageable pageable) {
+    public PageResponseDTO<List<MySalesResponse>> getUserSales(Long userId, TradeStatus tradeStatus, String sorting,Pageable pageable) {
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
         Page<Object[]> articles = null;
 
@@ -141,11 +154,35 @@ public class UserService {
             log.info("Principal: " + principal);
             if (principal instanceof CustomUserDetails customUserDetails) {
                 Long loggedInUserId = customUserDetails.getUser().getId();
-                    log.info("로그인 상태.");
-                articles = articleRepository.findByWriterIdAndTradeStatusUserLoggedIn(userId, loggedInUserId, tradeStatus, pageable);
+                log.info("로그인 상태.");
+                switch (sorting) {
+                    case "latest":
+                        articles = articleRepository.findByWriterIdAndTradeStatusUserLoggedIn(userId, loggedInUserId, tradeStatus, pageable);
+                        break;
+                    case "high-price":
+                        articles = articleRepository.findByWriterIdAndTradeStatusUserLoggedInOrderByPriceDESC(userId, loggedInUserId, tradeStatus, pageable);
+                        break;
+                    case "low-price":
+                        articles =  articleRepository.findByWriterIdAndTradeStatusUserLoggedInOrderByPriceASC(userId, loggedInUserId, tradeStatus, pageable);
+                        break;
+                    default:
+                        articles = articleRepository.findByWriterIdAndTradeStatusUserLoggedIn(userId, loggedInUserId, tradeStatus, pageable);
+                }
             }else if(principal instanceof String){
                 log.info("로그인되지 않았습니다.");
-                articles = articleRepository.findByWriterIdAndTradeStatusUser(userId, tradeStatus, pageable);
+                switch (sorting) {
+                    case "latest":
+                        articles =  articleRepository.findByWriterIdAndTradeStatusUser(userId, tradeStatus, pageable);
+                        break;
+                    case "high-price":
+                        articles = articleRepository.findByWriterIdAndTradeStatusUserOrderByPriceDESC(userId, tradeStatus, pageable);
+                        break;
+                    case "low-price":
+                        articles =  articleRepository.findByWriterIdAndTradeStatusUserOrderByPriceASC(userId, tradeStatus, pageable);
+                        break;
+                    default:
+                        articles = articleRepository.findByWriterIdAndTradeStatusUser(userId, tradeStatus, pageable);
+                }
             }
 
         } catch (Exception e) {
@@ -161,12 +198,26 @@ public class UserService {
         return pageResponseDTO;
     }
 
-    public PageResponseDTO getLikeArticles(Pageable pageable) {
+    public PageResponseDTO getLikeArticles(String sort, Pageable pageable) {
         CustomUserDetails principal = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = principal.getUser().getId();
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 
-        Page<Object[]> articles = articleRepository.findArticlesByUserIdWithLikes(userId,pageable);
+//        Page<Object[]> articles = articleRepository.findArticlesByUserIdWithLikes(userId,pageable);
+        Page<Object[]> articles;
+        switch (sort) {
+            case "latest":
+                articles = articleRepository.findArticlesByUserIdWithLikes(userId, pageable);
+                break;
+            case "high-price":
+                articles = articleRepository.findArticlesByUserIdWithLikesOrderByPriceDesc(userId, pageable);
+                break;
+            case "low-price":
+                articles = articleRepository.findArticlesByUserIdWithLikesOrderByPriceAsc(userId, pageable);
+                break;
+            default:
+                articles = articleRepository.findArticlesByUserIdWithLikes(userId, pageable);
+        }
         List<MySalesResponse> responses = articles.stream()
                 .map(this::createResponse)
                 .toList();
@@ -175,26 +226,25 @@ public class UserService {
         return pageResponseDTO;
     }
 
-    @Transactional
-    public void removeLikeArticles(Long articleId) {
+    public PageResponseDTO<List<MySalesResponse>> getMyOffers(TradeStatus tradeStatus, String sorting,Pageable pageable) {
         CustomUserDetails principal = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = principal.getUser().getId();
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 
-        Optional<LikeArticle> likeArticle = likeArticleRepository.findByArticleIdAndUserId(articleId, userId);
-        if (likeArticle.isEmpty()) {
-            throw new LikeArticleNotFoundException("찜한 상품이 존재하지 않습니다.");
+        Page<Object[]> articles;
+        switch (sorting) {
+            case "latest":
+                articles = articleRepository.getOfferedArticlesByUserId(userId, pageable);
+                break;
+            case "high-price":
+                articles = articleRepository.getOfferedArticlesByUserIdOrderByPriceDESC(userId, pageable);
+                break;
+            case "low-price":
+                articles =  articleRepository.getOfferedArticlesByUserIdOrderByPriceASC(userId, pageable);
+                break;
+            default:
+                articles = articleRepository.getOfferedArticlesByUserId(userId, pageable);
         }
-
-        likeArticleRepository.deleteByArticleIdAndUserId(articleId, userId);
-    }
-
-    public PageResponseDTO<List<MySalesResponse>> getMyOffers(TradeStatus tradeStatus, Pageable pageable) {
-        CustomUserDetails principal = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Long userId = principal.getUser().getId();
-        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
-
-        Page<Object[]> articles = articleRepository.getOfferedArticlesByUserId(userId, pageable);
         List<MySalesResponse> responses = articles.stream()
                 .map(this::createResponse)
                 .toList();
@@ -204,8 +254,6 @@ public class UserService {
 
     @Transactional
     public String updateLikeArticles(Long articleId) {
-
-
         var principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         log.info("Principal: " + principal);
         Long userId = null;
@@ -239,12 +287,25 @@ public class UserService {
         }
     }
 
-    public PageResponseDTO<List<MySalesResponse>> getMyBuys(TradeStatus tradeStatus, Pageable pageable) {
+    public PageResponseDTO<List<MySalesResponse>> getMyBuys(TradeStatus tradeStatus,String sorting, Pageable pageable) {
         CustomUserDetails principal = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = principal.getUser().getId();
         userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 
-        Page<Object[]> articles = articleRepository.getOfferedArticlesByUserIdAndIsSelected(userId, pageable);
+        Page<Object[]> articles;
+        switch (sorting) {
+            case "latest":
+                articles = articleRepository.getOfferedArticlesByUserIdAndIsSelected(userId, pageable);
+                break;
+            case "high-price":
+                articles = articleRepository.getOfferedArticlesByUserIdAndIsSelectedOrderByPriceDESC(userId, pageable);
+                break;
+            case "low-price":
+                articles =  articleRepository.getOfferedArticlesByUserIdAndIsSelectedOrderByPriceASC(userId, pageable);
+                break;
+            default:
+                articles = articleRepository.getOfferedArticlesByUserIdAndIsSelected(userId, pageable);
+        }
         List<MyBuysResponse> responses = articles.stream()
                 .map(this::createBuysResponse)
                 .toList();

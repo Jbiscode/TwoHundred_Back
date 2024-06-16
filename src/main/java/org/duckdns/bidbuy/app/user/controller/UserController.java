@@ -41,123 +41,52 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "유저 정보 불러오기 API", description = "다른 유저의 프로필 정보 불러오기")
-    @GetMapping(value = "/{userId}")
-    public ResponseEntity<ApiResponse<?>> getUser(@PathVariable(name = "userId") Long userId) {
-        MyProfileResponse responseDTO = userService.getUserProfile(userId);
-        ApiResponse<MyProfileResponse> response = new ApiResponse<>("200", "마이페이지 정보를 불러오는데 성공하였습니다.", responseDTO);
-        return ResponseEntity.ok(response);
-    }
-
-    @Operation(summary = "다른 사용자 판매상품 정보 불러오기 API, 최신순 정렬", description = "다른 사용자의 판매상품 정보 불러오기")
-    @GetMapping(value = "/{userId}/{tradeStatus}/latest")
-    public ResponseEntity<ApiResponse<PageResponseDTO<List<MySalesResponse>>>> getUserSalesOrderByLatest(
-            @PathVariable(name = "userId") Long userId,
-            @PageableDefault( page=0, size = 4, direction = Sort.Direction.DESC, sort = "createdDate") Pageable pageable,
-            @PathVariable(name = "tradeStatus") TradeStatus tradeStatus) {
-        log.error("다른사용자판매상품 컨트롤러1");
-        // batch
-        PageResponseDTO<List<MySalesResponse>> responseDTO = userService.getUserSales(userId,tradeStatus, pageable);
-        ApiResponse<PageResponseDTO<List<MySalesResponse>>> response = new ApiResponse<>("200", "판매중인 상품목록을 불러오는데 성공하였습니다.", responseDTO);
-        return ResponseEntity.ok(response);
-    }
-
-
-    @Operation(summary = "내 판매상품 정보 불러오기 API, 최신순 정렬", description = "로그인된 사용자만 내 정보 불러올 수 있음")
-    @GetMapping(value = "/me/{tradeStatus}/latest")
-    public ResponseEntity<ApiResponse<PageResponseDTO<List<MySalesResponse>>>> getUserSalesOrderByLatest(
-            @PageableDefault( page=0, size = 4, direction = Sort.Direction.DESC, sort = "createdDate") Pageable pageable,
-            @PathVariable(name = "tradeStatus") TradeStatus tradeStatus) {
+    @Operation(summary = "내 판매상품 정보 불러오기 API", description = "로그인된 사용자만 내 정보 불러올 수 있음")
+    @GetMapping(value = "/me/sales")
+    public ResponseEntity<ApiResponse<PageResponseDTO<List<MySalesResponse>>>> getUserSales(
+            @PageableDefault( page=0, size = 4) Pageable pageable,
+            @RequestParam(name = "tradeStatus") TradeStatus tradeStatus,
+            @RequestParam(name = "sorting", required = false, defaultValue = "latest") String sorting) {
 
         // batch
-        PageResponseDTO<List<MySalesResponse>> responseDTO = userService.getMySales(tradeStatus, pageable);
+        PageResponseDTO<List<MySalesResponse>> responseDTO = userService.getMySales(sorting,tradeStatus, pageable);
         ApiResponse<PageResponseDTO<List<MySalesResponse>>> response = new ApiResponse<>("200", "판매중인 상품목록을 불러오는데 성공하였습니다.", responseDTO);
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "내 판매상품 정보 불러오기 API, 낮은 가격순 정렬", description = "로그인된 사용자만 내 정보 불러올 수 있음")
-    @GetMapping(value = "/me/{tradeStatus}/low-price")
-    public ResponseEntity<ApiResponse<PageResponseDTO<List<MySalesResponse>>>> getUserSalesOrderByPriceASC(
-            @PageableDefault( page=0, size = 4, direction = Sort.Direction.ASC, sort = "price") Pageable pageable,
-            @PathVariable(name = "tradeStatus") TradeStatus tradeStatus) {
+    @Operation(summary = "내 찜한상품 목록 불러오기 API", description = "로그인된 사용자만 내 정보 불러올 수 있음")
+    @GetMapping(value = "/me/likes")
+    public ResponseEntity<ApiResponse<PageResponseDTO<List<MySalesResponse>>>> getUserLikeArticles(
+            @RequestParam(name = "sorting", required = false, defaultValue = "latest") String sorting,
+            @PageableDefault(page = 0, size = 4) Pageable pageable) {
 
-        // batch
-        PageResponseDTO<List<MySalesResponse>> responseDTO = userService.getMySales(tradeStatus, pageable);
+        PageResponseDTO<List<MySalesResponse>> responseDTO = userService.getLikeArticles(sorting, pageable);
+
         ApiResponse<PageResponseDTO<List<MySalesResponse>>> response = new ApiResponse<>("200", "판매중인 상품목록을 불러오는데 성공하였습니다.", responseDTO);
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "내 판매상품 정보 불러오기 API, 높은 가격순 정렬", description = "로그인된 사용자만 내 정보 불러올 수 있음")
-    @GetMapping(value = "/me/{tradeStatus}/high-price")
-    public ResponseEntity<ApiResponse<PageResponseDTO<List<MySalesResponse>>>> getUserSalesOrderByPriceDESC(
-            @PageableDefault( page=0, size = 4, direction = Sort.Direction.DESC, sort = "price") Pageable pageable,
-            @PathVariable(name = "tradeStatus") TradeStatus tradeStatus) {
+    @Operation(summary = "내 가격제안 정보 불러오기 API", description = "로그인된 사용자만 내 정보 불러올 수 있음")
+    @GetMapping(value = "/me/offers")
+    public ResponseEntity<ApiResponse<PageResponseDTO<List<MySalesResponse>>>> getUserOffers(
+            @PageableDefault( page=0, size = 4) Pageable pageable,
+            @RequestParam(name = "tradeStatus") TradeStatus tradeStatus,
+            @RequestParam(name = "sorting", required = false, defaultValue = "latest") String sorting) {
 
-        PageResponseDTO<List<MySalesResponse>> responseDTO = userService.getMySales(tradeStatus, pageable);
-        ApiResponse<PageResponseDTO<List<MySalesResponse>>> response = new ApiResponse<>("200", "판매중인 상품목록을 불러오는데 성공하였습니다.", responseDTO);
-        return ResponseEntity.ok(response);
-    }
-
-    @Operation(summary = "내 찜한상품 목록 불러오기 API, 최신순 정렬", description = "로그인된 사용자만 내 정보 불러올 수 있음")
-    @GetMapping(value = "/me/likes/latest")
-    public ResponseEntity<ApiResponse<PageResponseDTO<List<MySalesResponse>>>> getUserLikeArticlesOrderByLatest(
-            @PageableDefault( page=0, size = 4, direction = Sort.Direction.DESC, sort = "createdDate") Pageable pageable) {
-
-        PageResponseDTO<List<MySalesResponse>> responseDTO = userService.getLikeArticles(pageable);
-        ApiResponse<PageResponseDTO<List<MySalesResponse>>> response = new ApiResponse<>("200", "판매중인 상품목록을 불러오는데 성공하였습니다.", responseDTO);
-        return ResponseEntity.ok(response);
-    }
-
-    @Operation(summary = "내 찜한상품 목록 불러오기 API, 높은 가격순 정렬", description = "로그인된 사용자만 내 정보 불러올 수 있음")
-    @GetMapping(value = "/me/likes/high-price")
-    public ResponseEntity<ApiResponse<PageResponseDTO<List<MySalesResponse>>>> getUserLikeArticlesOrderByPriceDESC(
-            @PageableDefault( page=0, size = 4, direction = Sort.Direction.DESC, sort = "price") Pageable pageable) {
-
-        PageResponseDTO<List<MySalesResponse>> responseDTO = userService.getLikeArticles(pageable);
-        ApiResponse<PageResponseDTO<List<MySalesResponse>>> response = new ApiResponse<>("200", "판매중인 상품목록을 불러오는데 성공하였습니다.", responseDTO);
-        return ResponseEntity.ok(response);
-    }
-
-    @Operation(summary = "내 찜한상품 목록 불러오기 API, 낮은 가격순 정렬", description = "로그인된 사용자만 내 정보 불러올 수 있음")
-    @GetMapping(value = "/me/likes/low-price")
-    public ResponseEntity<ApiResponse<PageResponseDTO<List<MySalesResponse>>>> getUserLikeArticlesOrderByPriceASC(
-            @PageableDefault( page=0, size = 4, direction = Sort.Direction.ASC, sort = "price") Pageable pageable) {
-
-        PageResponseDTO<List<MySalesResponse>> responseDTO = userService.getLikeArticles(pageable);
-        ApiResponse<PageResponseDTO<List<MySalesResponse>>> response = new ApiResponse<>("200", "판매중인 상품목록을 불러오는데 성공하였습니다.", responseDTO);
-        return ResponseEntity.ok(response);
-    }
-
-    @Operation(summary = "내 가격제안 정보 불러오기 API, 최신순 정렬", description = "로그인된 사용자만 내 정보 불러올 수 있음")
-    @GetMapping(value = "/me/offers/{tradeStatus}/latest")
-    public ResponseEntity<ApiResponse<PageResponseDTO<List<MySalesResponse>>>> getUserOffersOrderByLatest(
-            @PageableDefault( page=0, size = 4, direction = Sort.Direction.DESC, sort = "createdDate") Pageable pageable,
-            @PathVariable(name = "tradeStatus") TradeStatus tradeStatus) {
-
-        PageResponseDTO<List<MySalesResponse>> responseDTO = userService.getMyOffers(tradeStatus, pageable);
+        PageResponseDTO<List<MySalesResponse>> responseDTO = userService.getMyOffers(tradeStatus, sorting,pageable);
         ApiResponse<PageResponseDTO<List<MySalesResponse>>> response = new ApiResponse<>("200", "가격제안한 상품목록을 불러오는데 성공하였습니다.", responseDTO);
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "내 가격제안 정보 불러오기 API, 높은 가격순 정렬", description = "로그인된 사용자만 내 정보 불러올 수 있음")
-    @GetMapping(value = "/me/offers/{tradeStatus}/high-price")
-    public ResponseEntity<ApiResponse<PageResponseDTO<List<MySalesResponse>>>> getUserOffersOrderByPriceDESC(
-            @PageableDefault( page=0, size = 4, direction = Sort.Direction.DESC, sort = "createdDate") Pageable pageable,
-            @PathVariable(name = "tradeStatus") TradeStatus tradeStatus) {
+    @Operation(summary = "내 구매내역 정보 불러오기 API", description = "로그인된 사용자만 내 정보 불러올 수 있음")
+    @GetMapping(value = "/me/buys")
+    public ResponseEntity<ApiResponse<PageResponseDTO<List<MySalesResponse>>>> getUserBuys(
+            @PageableDefault( page=0, size = 4) Pageable pageable,
+            @RequestParam(name = "tradeStatus") TradeStatus tradeStatus,
+            @RequestParam(name = "sorting", required = false, defaultValue = "latest") String sorting) {
 
-        PageResponseDTO<List<MySalesResponse>> responseDTO = userService.getMyOffers(tradeStatus, pageable);
-        ApiResponse<PageResponseDTO<List<MySalesResponse>>> response = new ApiResponse<>("200", "가격제안한 상품목록을 불러오는데 성공하였습니다.", responseDTO);
-        return ResponseEntity.ok(response);
-    }
-
-    @Operation(summary = "내 가격제안 정보 불러오기 API, 높은 낮은순 정렬", description = "로그인된 사용자만 내 정보 불러올 수 있음")
-    @GetMapping(value = "/me/offers/{tradeStatus}/low-price")
-    public ResponseEntity<ApiResponse<PageResponseDTO<List<MySalesResponse>>>> getUserOffersOrderByPriceASC(
-            @PageableDefault( page=0, size = 4, direction = Sort.Direction.DESC, sort = "createdDate") Pageable pageable,
-            @PathVariable(name = "tradeStatus") TradeStatus tradeStatus) {
-
-        PageResponseDTO<List<MySalesResponse>> responseDTO = userService.getMyOffers(tradeStatus, pageable);
-        ApiResponse<PageResponseDTO<List<MySalesResponse>>> response = new ApiResponse<>("200", "가격제안한 상품목록을 불러오는데 성공하였습니다.", responseDTO);
+        PageResponseDTO<List<MySalesResponse>> responseDTO = userService.getMyBuys(tradeStatus, sorting,pageable);
+        ApiResponse<PageResponseDTO<List<MySalesResponse>>> response = new ApiResponse<>("200", "구매내역을 불러오는데 성공하였습니다.", responseDTO);
         return ResponseEntity.ok(response);
     }
 
@@ -171,39 +100,27 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "내 구매내역 정보 불러오기 API, 최신순 정렬", description = "로그인된 사용자만 내 정보 불러올 수 있음")
-    @GetMapping(value = "/me/buys/{tradeStatus}/latest")
-    public ResponseEntity<ApiResponse<PageResponseDTO<List<MySalesResponse>>>> getUserBuysOrderByLatest(
-            @PageableDefault( page=0, size = 4, direction = Sort.Direction.DESC, sort = "createdDate") Pageable pageable,
-            @PathVariable(name = "tradeStatus") TradeStatus tradeStatus) {
-
-        PageResponseDTO<List<MySalesResponse>> responseDTO = userService.getMyBuys(tradeStatus, pageable);
-        ApiResponse<PageResponseDTO<List<MySalesResponse>>> response = new ApiResponse<>("200", "구매내역을 불러오는데 성공하였습니다.", responseDTO);
+    @Operation(summary = "유저 정보 불러오기 API", description = "다른 유저의 프로필 정보 불러오기")
+    @GetMapping(value = "/{userId}")
+    public ResponseEntity<ApiResponse<?>> getUser(@PathVariable(name = "userId") Long userId) {
+        MyProfileResponse responseDTO = userService.getUserProfile(userId);
+        ApiResponse<MyProfileResponse> response = new ApiResponse<>("200", "마이페이지 정보를 불러오는데 성공하였습니다.", responseDTO);
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "내 구매내역 정보 불러오기 API, 높은 가격순 정렬", description = "로그인된 사용자만 내 정보 불러올 수 있음")
-    @GetMapping(value = "/me/buys/{tradeStatus}/high-price")
-    public ResponseEntity<ApiResponse<PageResponseDTO<List<MySalesResponse>>>> getUserBuysOrderByPriceDESC(
-            @PageableDefault( page=0, size = 4, direction = Sort.Direction.DESC, sort = "price") Pageable pageable,
-            @PathVariable(name = "tradeStatus") TradeStatus tradeStatus) {
-
-        PageResponseDTO<List<MySalesResponse>> responseDTO = userService.getMyBuys(tradeStatus, pageable);
-        ApiResponse<PageResponseDTO<List<MySalesResponse>>> response = new ApiResponse<>("200", "구매내역을 불러오는데 성공하였습니다.", responseDTO);
+    @Operation(summary = "다른 사용자 판매상품 정보 불러오기 API", description = "다른 사용자의 판매상품 정보 불러오기")
+    @GetMapping(value = "/{userId}/sales")
+    public ResponseEntity<ApiResponse<PageResponseDTO<List<MySalesResponse>>>> getUserSales(
+            @PathVariable(name = "userId") Long userId,
+            @PageableDefault( page=0, size = 4) Pageable pageable,
+            @RequestParam(name = "tradeStatus") TradeStatus tradeStatus,
+            @RequestParam(name = "sorting", required = false, defaultValue = "latest") String sorting) {
+        log.error("다른사용자판매상품 컨트롤러1");
+        // batch
+        PageResponseDTO<List<MySalesResponse>> responseDTO = userService.getUserSales(userId,tradeStatus, sorting,pageable);
+        ApiResponse<PageResponseDTO<List<MySalesResponse>>> response = new ApiResponse<>("200", "판매중인 상품목록을 불러오는데 성공하였습니다.", responseDTO);
         return ResponseEntity.ok(response);
     }
-
-    @Operation(summary = "내 구매내역 정보 불러오기 API, 낮은 가격순 정렬", description = "로그인된 사용자만 내 정보 불러올 수 있음")
-    @GetMapping(value = "/me/buys/{tradeStatus}/low-price")
-    public ResponseEntity<ApiResponse<PageResponseDTO<List<MySalesResponse>>>> getUserBuysOrderByPriceASC(
-            @PageableDefault( page=0, size = 4, direction = Sort.Direction.DESC, sort = "price") Pageable pageable,
-            @PathVariable(name = "tradeStatus") TradeStatus tradeStatus) {
-
-        PageResponseDTO<List<MySalesResponse>> responseDTO = userService.getMyBuys(tradeStatus, pageable);
-        ApiResponse<PageResponseDTO<List<MySalesResponse>>> response = new ApiResponse<>("200", "구매내역을 불러오는데 성공하였습니다.", responseDTO);
-        return ResponseEntity.ok(response);
-    }
-
 
     @Operation(summary = "리뷰 목록 조회 API", description = "다른 사람의 프로필페이지에서 리뷰 목록 조회")
     @GetMapping(value = "/{userId}/reviews")
@@ -216,6 +133,5 @@ public class UserController {
         ApiResponse<PageResponseDTO<List<ReviewResponse>>> response = new ApiResponse<>("200", "리뷰내역을 불러오는데 성공했습니다.", responseDTO);
         return ResponseEntity.ok(response);
     }
-
 
 }
