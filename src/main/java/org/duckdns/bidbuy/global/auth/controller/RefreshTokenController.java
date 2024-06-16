@@ -1,6 +1,7 @@
 package org.duckdns.bidbuy.global.auth.controller;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.io.IOException;
 import java.util.Date;
 
 @Controller
@@ -35,7 +37,7 @@ public class RefreshTokenController {
     }
 
     @GetMapping("/refreshToken")
-    public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         log.info("refreshToken 시작");
         //get refresh token
         String refreshToken = null;
@@ -76,9 +78,20 @@ public class RefreshTokenController {
         //DB에 저장되어 있는지 확인
         Boolean isExist = refreshTokenRepository.existsByRefreshToken(refreshToken);
         if (!isExist) {
+            //로그아웃 진행
 
-            //response body
-            return new ResponseEntity<>("잘못된 refresh token 입니다.", HttpStatus.BAD_REQUEST);
+            //Refresh 토큰 Cookie 값 0
+            Cookie cookie = new Cookie("refresh", null);
+            cookie.setMaxAge(0);
+            cookie.setPath("/");
+
+            response.addCookie(cookie);
+            //json
+//            response.setContentType("application/json");
+//            response.setStatus(HttpServletResponse.SC_OK);
+            ApiResponse<String> apiResponse = new ApiResponse<>("400", "다른곳에서 로그인 되었습니다.", null);
+//            response.getWriter().write(new ObjectMapper().writeValueAsString(apiResponse));
+            return ResponseEntity.ok(apiResponse);
         }
 
         Long userId = jwtUtil.getUserId(refreshToken);

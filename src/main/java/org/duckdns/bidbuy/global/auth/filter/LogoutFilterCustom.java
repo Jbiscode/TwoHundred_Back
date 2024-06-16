@@ -90,15 +90,15 @@ public class LogoutFilterCustom extends GenericFilterBean {
 
         //DB에 저장되어 있는지 확인
         Boolean isExist = refreshTokenRepository.existsByRefreshToken(refreshToken);
-        if (!isExist) {
+        if (isExist) {
             //response status code
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
+//            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        //Refresh 토큰 DB에서 제거
+        refreshTokenRepository.deleteByRefreshToken(refreshToken);
+//            return;
         }
 
         //로그아웃 진행
-        //Refresh 토큰 DB에서 제거
-        refreshTokenRepository.deleteByRefreshToken(refreshToken);
 
         //Refresh 토큰 Cookie 값 0
         Cookie cookie = new Cookie("refresh", null);

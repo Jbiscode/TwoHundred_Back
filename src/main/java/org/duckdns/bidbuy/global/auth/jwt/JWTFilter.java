@@ -39,11 +39,11 @@ public class JWTFilter extends OncePerRequestFilter {
         String authorization = request.getHeader("Authorization");
         String refreshToken = "";
 
-        log.info("authorization1: {}", authorization);
+//        log.info("authorization1: {}", authorization);
         if (authorization != null && authorization.startsWith("Bearer ")) {
             accessToken = authorization.split(" ")[1];
         }
-        log.info("accessToken1: {}", accessToken);
+//        log.info("accessToken1: {}", accessToken);
 
         if (accessToken.isEmpty() || !authorization.startsWith("Bearer")){
             Cookie[] cookies = request.getCookies();
@@ -51,18 +51,18 @@ public class JWTFilter extends OncePerRequestFilter {
                 for (Cookie cookie : cookies) {
                     if (cookie.getName().equals("Authorization")) {
                         accessToken = cookie.getValue();
-                        log.info("accessToken: {}", accessToken);
+//                        log.info("accessToken: {}", accessToken);
                     }
                     if (cookie.getName().equals("refresh")) {
                         refreshToken = cookie.getValue();
-                        log.info("refreshToken: {}", refreshToken);
+//                        log.info("refreshToken: {}", refreshToken);
                 }
             }
         }
         }
 
         if (accessToken.isEmpty()) {
-            log.info("token 이 없습니다?");
+//            log.info("token 이 없습니다?");
             // 권한없음
 
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -146,7 +146,7 @@ public class JWTFilter extends OncePerRequestFilter {
             Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authToken);
 
-            log.info("토큰 검증 완료");
+            log.trace("토큰 검증 완료");
             filterChain.doFilter(request, response);
         }
 

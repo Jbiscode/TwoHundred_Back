@@ -114,9 +114,11 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private void addRefreshTokenEntity(Long userId,String username, String refreshToken, Long expiredMs) {
 
         Date date = new Date(System.currentTimeMillis() + expiredMs);
-
+        if(refreshTokenRepository.existsByUserId(userId)) {
+            refreshTokenRepository.deleteByUserId(userId);
+        }
         RefreshTokenEntity refreshTokenEntity = RefreshTokenEntity.builder()
-                                                            .id(userId)
+                                                            .userId(userId)
                                                             .userName(username)
                                                             .refreshToken(refreshToken)
                                                             .expiration(date.toString())
