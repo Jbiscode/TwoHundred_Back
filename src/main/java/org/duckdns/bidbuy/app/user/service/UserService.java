@@ -121,7 +121,7 @@ public class UserService {
         Long userId = principal.getUser().getId();
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 
-        Page<Object[]> articles;
+        Page<MySalesResponse> articles;
         switch (sorting) {
             case "latest":
                 articles = articleRepository.findByWriterIdAndTradeStatus(userId, status, pageable);
@@ -136,9 +136,7 @@ public class UserService {
                 articles = articleRepository.findByWriterIdAndTradeStatus(userId, status, pageable);
         }
 
-        List<MySalesResponse> responses = articles.stream()
-                .map(this::createResponse)
-                .toList();
+        List<MySalesResponse> responses = articles.getContent();
 
         PageResponseDTO pageResponseDTO = new PageResponseDTO(responses, pageable, articles.getTotalElements());
 
@@ -147,7 +145,7 @@ public class UserService {
 
     public PageResponseDTO<List<MySalesResponse>> getUserSales(Long userId, TradeStatus tradeStatus, String sorting,Pageable pageable) {
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
-        Page<Object[]> articles = null;
+        Page<MySalesResponse> articles = null;
 
         try {
             var principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -189,10 +187,7 @@ public class UserService {
             log.error("Error getting user sales: {}", e.getMessage());
             throw new RuntimeException("Error getting user sales", e);
         }
-        List<MySalesResponse> responses = articles.stream()
-                .map(this::createResponse)
-                .toList();
-
+        List<MySalesResponse> responses = articles.getContent();
         PageResponseDTO pageResponseDTO = new PageResponseDTO(responses, pageable, articles.getTotalElements());
 
         return pageResponseDTO;
@@ -204,7 +199,7 @@ public class UserService {
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 
 //        Page<Object[]> articles = articleRepository.findArticlesByUserIdWithLikes(userId,pageable);
-        Page<Object[]> articles;
+        Page<MySalesResponse> articles;
         switch (sort) {
             case "latest":
                 articles = articleRepository.findArticlesByUserIdWithLikes(userId, pageable);
@@ -218,9 +213,7 @@ public class UserService {
             default:
                 articles = articleRepository.findArticlesByUserIdWithLikes(userId, pageable);
         }
-        List<MySalesResponse> responses = articles.stream()
-                .map(this::createResponse)
-                .toList();
+        List<MySalesResponse> responses = articles.getContent();
 
         PageResponseDTO pageResponseDTO = new PageResponseDTO(responses, pageable, articles.getTotalElements());
         return pageResponseDTO;
@@ -231,7 +224,7 @@ public class UserService {
         Long userId = principal.getUser().getId();
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 
-        Page<Object[]> articles;
+        Page<MySalesResponse> articles;
         switch (sorting) {
             case "latest":
                 articles = articleRepository.getOfferedArticlesByUserId(userId, pageable);
@@ -245,9 +238,7 @@ public class UserService {
             default:
                 articles = articleRepository.getOfferedArticlesByUserId(userId, pageable);
         }
-        List<MySalesResponse> responses = articles.stream()
-                .map(this::createResponse)
-                .toList();
+        List<MySalesResponse> responses = articles.getContent();
         PageResponseDTO pageResponseDTO = new PageResponseDTO(responses, pageable, articles.getTotalElements());
         return pageResponseDTO;
     }
@@ -292,9 +283,10 @@ public class UserService {
         Long userId = principal.getUser().getId();
         userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 
-        Page<Object[]> articles;
+        Page<MySalesResponse> articles;
         switch (sorting) {
             case "latest":
+                log.error("나 맞지?");
                 articles = articleRepository.getOfferedArticlesByUserIdAndIsSelected(userId, pageable);
                 break;
             case "high-price":
@@ -306,9 +298,7 @@ public class UserService {
             default:
                 articles = articleRepository.getOfferedArticlesByUserIdAndIsSelected(userId, pageable);
         }
-        List<MyBuysResponse> responses = articles.stream()
-                .map(this::createBuysResponse)
-                .toList();
+        List<MySalesResponse> responses = articles.getContent();
         PageResponseDTO pageResponseDTO = new PageResponseDTO(responses, pageable, articles.getTotalElements());
         return pageResponseDTO;
     }
@@ -329,39 +319,6 @@ public class UserService {
         }
     }
 
-    // MySalesResponse 객체 생성메서드
-    private MySalesResponse createResponse(Object[] article) {
-        Long id = (Long) article[0];
-        String title = (String) article[1];
-        Integer price = (Integer) article[2];
-        String addr1 = (String) article[3];
-        String addr2 = (String) article[4];
-        TradeStatus tradeStatus = (TradeStatus) article[5];
-        LocalDateTime createdDate = (LocalDateTime) article[6];
-        String thumbnailUrl = (String) article[7];
-        Boolean isLiked = article.length > 8 ? (Boolean) article[8] : null;
-
-        String timeAgo = getTimeAgo(createdDate);
-
-        return new MySalesResponse(id, title, price, addr1, addr2, tradeStatus, timeAgo, thumbnailUrl, isLiked);
-    }
-
-    private MyBuysResponse createBuysResponse(Object[] article) {
-        Long id = (Long) article[0];
-        String title = (String) article[1];
-        Integer price = (Integer) article[2];
-        String addr1 = (String) article[3];
-        String addr2 = (String) article[4];
-        TradeStatus tradeStatus = (TradeStatus) article[5];
-        LocalDateTime createdDate = (LocalDateTime) article[6];
-        String thumbnailUrl = (String) article[7];
-        Boolean isLiked = article.length > 8 ? (Boolean) article[8] : null;
-        Boolean isReviewed = article.length > 9 ? (Boolean) article[9] : null;
-
-        String timeAgo = getTimeAgo(createdDate);
-
-        return new MyBuysResponse(id, title, price, addr1, addr2, tradeStatus, timeAgo, thumbnailUrl, isLiked, isReviewed);
-    }
 
 
 
