@@ -15,6 +15,7 @@ import org.duckdns.bidbuy.app.article.repository.ArticleRepository;
 import org.duckdns.bidbuy.app.article.repository.LikeArticleRepository;
 import org.duckdns.bidbuy.app.article.repository.ProductImageRepository;
 import org.duckdns.bidbuy.app.offer.dto.OfferResponse;
+import org.duckdns.bidbuy.app.offer.repository.OfferRepository;
 import org.duckdns.bidbuy.app.offer.service.OfferService;
 import org.duckdns.bidbuy.app.user.domain.User;
 import org.duckdns.bidbuy.app.user.exception.ForbiddenException;
@@ -45,6 +46,7 @@ public class ArticleService {
     private final ImageUploadService imageUploadService;
     private final OfferService offerService;
     private final LikeArticleRepository likeArticleRepository;
+    private final OfferRepository offerRepository;
 
     @Transactional
     public ArticleResponse createArticle(ArticleRequest requestDTO, MultipartFile[] images) throws IOException {
@@ -241,6 +243,11 @@ public class ArticleService {
         if (!article.getWriter().getId().equals(userId)) {
             throw new ArticleNoPermitException(userId);
         }
+
+        // likeArticle 테이블에서 관련된 행 삭제
+        likeArticleRepository.deleteByArticleId(id);
+        // offer 테이블에서 관련된 행 삭제
+        offerRepository.deleteByArticleId(id);
 
         List<ProductImage> images = productImageRepository.findByArticle(article);
         for (ProductImage productImage : images) {
