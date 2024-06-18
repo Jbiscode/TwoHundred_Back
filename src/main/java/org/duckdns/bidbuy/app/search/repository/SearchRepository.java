@@ -2,14 +2,13 @@ package org.duckdns.bidbuy.app.search.repository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
 import org.duckdns.bidbuy.app.article.domain.Article;
 import org.duckdns.bidbuy.app.article.domain.Category;
+import org.duckdns.bidbuy.app.article.domain.LikeArticle;
 import org.duckdns.bidbuy.app.article.domain.TradeMethod;
+import org.duckdns.bidbuy.app.user.domain.User;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -112,4 +111,45 @@ public class SearchRepository {
         return em.createQuery(cq).getSingleResult();
     }
 
+    public List<User> findUser(Long id) {
+        return em.createQuery("select u from User u where u.id = :id", User.class)
+                .setParameter("id", id)
+                .getResultList();
+    }
+
+    public List<LikeArticle> findLikeArticles(Category category, TradeMethod tradeMethod, String content) {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<LikeArticle> cq = cb.createQuery(LikeArticle.class);
+        Root<LikeArticle> likeArticle = cq.from(LikeArticle.class);
+        Join<LikeArticle, Article> article = likeArticle.join("article");
+
+        List<Predicate> predicates = new ArrayList<>();
+
+        // 카테고리
+        if (category != null) {
+            predicates.add(cb.equal(article.get("category"), category));
+        }
+
+        // 거래 방식
+        if (tradeMethod != null) {
+            predicates.add(cb.equal(article.get("tradeMethod"), tradeMethod));
+        }
+
+        // 검색 내용
+        if (content != null && !content.trim().isEmpty()) {
+            String contentPattern = "%" + content + "%";
+            Predicate contentPredicate = cb.or(
+                    cb.like(article.get("title"), contentPattern),
+                    cb.like(article.get("addr1"), contentPattern),
+                    cb.like(article.get("addr2"), contentPattern)
+            );
+            predicates.add(contentPredicate);
+        }
+
+        cq.where(predicates.toArray(new Predicate[0]));
+
+        TypedQuery<LikeArticle> query = em.createQuery(cq);
+
+        return query.getResultList();
+    }
 }
