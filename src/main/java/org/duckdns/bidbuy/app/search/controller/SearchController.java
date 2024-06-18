@@ -4,14 +4,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.duckdns.bidbuy.app.article.domain.Article;
 import org.duckdns.bidbuy.app.article.domain.Category;
+import org.duckdns.bidbuy.app.article.domain.LikeArticle;
 import org.duckdns.bidbuy.app.article.domain.TradeMethod;
+import org.duckdns.bidbuy.app.search.dto.LikeArticleResponse;
 import org.duckdns.bidbuy.app.search.dto.SearchArticleResponse;
 import org.duckdns.bidbuy.app.search.dto.SearchResponse;
+import org.duckdns.bidbuy.app.search.dto.UserResponse;
 import org.duckdns.bidbuy.app.search.service.SearchService;
+import org.duckdns.bidbuy.app.user.domain.User;
 import org.duckdns.bidbuy.global.common.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,15 +38,41 @@ public class SearchController {
                                                     @RequestParam(required = false) String orderBy,
                                                     @RequestParam int page,
                                                     @RequestParam int size) {
+
+        //검색 게시글
         List<Article> search = searchService.search(category, tradeMethod, content, orderBy, page, size);
-        Long totalCount = searchService.totalCount(category, tradeMethod, content);
         List<SearchArticleResponse> searchResult = search.stream()
                 .map(s -> new SearchArticleResponse(s))
                 .collect(toList());
 
-        SearchResponse result = new SearchResponse(totalCount, searchResult);
+        //게시글 총 수
+        Long totalCount = searchService.totalCount(category, tradeMethod, content);
+
+        //검색된 게시글에서 좋아요
+        List<LikeArticle> likeArticles = searchService.findLikeArticles(category, tradeMethod, content);
+        List<LikeArticleResponse> likeArticleResult = likeArticles.stream()
+                .map(l -> new LikeArticleResponse(l))
+                .collect(toList());
+
+
+
+        SearchResponse result = new SearchResponse(totalCount, searchResult, likeArticleResult);
 
         ApiResponse<SearchResponse> response = new ApiResponse<>("200", "검색결과 페이지 조회 완료", result);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/")
+    public ResponseEntity<ApiResponse<List<UserResponse>>> findUser(@RequestParam(required = false) Long id) {
+        List<UserResponse> result = new ArrayList<>();
+
+        if (id != null) {
+            List<User> users = searchService.findUser(id);
+            result = users.stream()
+                    .map(u -> new UserResponse(u.getId(), u.getAddr1(), u.getAddr2()))
+                    .collect(toList());
+        }
+        ApiResponse<List<UserResponse>> response = new ApiResponse<>("200", "유저 정보 조회 완료", result);
         return ResponseEntity.ok(response);
     }
 

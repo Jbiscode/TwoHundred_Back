@@ -1,12 +1,11 @@
 package org.duckdns.bidbuy.app.search.dto;
 
 import lombok.Getter;
-import org.duckdns.bidbuy.app.article.domain.Article;
-import org.duckdns.bidbuy.app.article.domain.Category;
-import org.duckdns.bidbuy.app.article.domain.ProductImage;
-import org.duckdns.bidbuy.app.article.domain.TradeMethod;
+import org.duckdns.bidbuy.app.article.domain.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 public class SearchArticleResponse {
@@ -15,7 +14,6 @@ public class SearchArticleResponse {
     private Category category;
 
     private String title;
-    private String content;
     private Integer price;
     private String addr1;
     private String addr2;
@@ -27,19 +25,17 @@ public class SearchArticleResponse {
 
     private LocalDateTime createdDate;
 
-
-
     public SearchArticleResponse(Article article) {
         id = article.getId();
         category = article.getCategory();
         title = article.getTitle();
-        content = article.getContent();
         price = article.getPrice();
         addr1 = article.getAddr1();
         addr2 = article.getAddr2();
         viewCount = article.getViewCount();
         tradeMethod = article.getTradeMethod();
         createdDate = article.getCreatedDate();
+
 
 
         if (article.getProductImages() != null && !article.getProductImages().isEmpty()) {
