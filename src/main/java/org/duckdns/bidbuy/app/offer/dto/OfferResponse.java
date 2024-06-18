@@ -18,5 +18,6 @@ public class OfferResponse {
     private String offererAddr2;
     private LocalDateTime createdDate;
     private Integer offerPrice;
+    private boolean isSelected;
 
 }

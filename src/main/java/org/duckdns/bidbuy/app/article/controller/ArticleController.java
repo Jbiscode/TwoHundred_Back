@@ -4,10 +4,7 @@ package org.duckdns.bidbuy.app.article.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.duckdns.bidbuy.app.article.dto.ArticleRequest;
-import org.duckdns.bidbuy.app.article.dto.ArticleResponse;
-import org.duckdns.bidbuy.app.article.dto.ArticleDetailResponse;
-import org.duckdns.bidbuy.app.article.dto.ArticleSummaryResponse;
+import org.duckdns.bidbuy.app.article.dto.*;
 import org.duckdns.bidbuy.app.article.service.ArticleService;
 import org.duckdns.bidbuy.global.common.response.ApiResponse;
 import org.springframework.http.MediaType;
@@ -79,4 +76,13 @@ public class ArticleController {
         ApiResponse<List<ArticleSummaryResponse>> response = new ApiResponse<>("200", "전체 게시글 조회 성공", articleSummaryResponses);
         return ResponseEntity.ok(response);
     }
+
+    @Operation(summary = "게시글 좋아요 API", description = "로그인한 사용자만 좋아요 가능")
+    @PostMapping(value = "/{articleId}/like")
+    public ResponseEntity<ApiResponse<String>> likeArticle(@PathVariable Long articleId) {
+        String result = articleService.likeArticle(articleId);
+        ApiResponse<String> response = new ApiResponse<>("200", "게시글 좋아요 처리 완료", result);
+        return ResponseEntity.ok(response);
+    }
+
 }

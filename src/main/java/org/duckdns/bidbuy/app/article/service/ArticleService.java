@@ -2,6 +2,7 @@ package org.duckdns.bidbuy.app.article.service;
 
 import lombok.RequiredArgsConstructor;
 import org.duckdns.bidbuy.app.article.domain.Article;
+import org.duckdns.bidbuy.app.article.domain.LikeArticle;
 import org.duckdns.bidbuy.app.article.domain.ProductImage;
 import org.duckdns.bidbuy.app.article.dto.ArticleDetailResponse;
 import org.duckdns.bidbuy.app.article.dto.ArticleRequest;
@@ -11,10 +12,14 @@ import org.duckdns.bidbuy.app.article.exception.ArticleNoPermitException;
 import org.duckdns.bidbuy.app.article.exception.ArticleNotExistException;
 import org.duckdns.bidbuy.app.article.exception.WriterNotFoundException;
 import org.duckdns.bidbuy.app.article.repository.ArticleRepository;
+import org.duckdns.bidbuy.app.article.repository.LikeArticleRepository;
 import org.duckdns.bidbuy.app.article.repository.ProductImageRepository;
 import org.duckdns.bidbuy.app.offer.dto.OfferResponse;
+import org.duckdns.bidbuy.app.offer.repository.OfferRepository;
 import org.duckdns.bidbuy.app.offer.service.OfferService;
 import org.duckdns.bidbuy.app.user.domain.User;
+import org.duckdns.bidbuy.app.user.exception.ForbiddenException;
+import org.duckdns.bidbuy.app.user.exception.NotLoggedInException;
 import org.duckdns.bidbuy.app.user.repository.UserRepository;
 import org.duckdns.bidbuy.global.auth.domain.CustomUserDetails;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,6 +32,7 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,6 +45,8 @@ public class ArticleService {
     private final ProductImageRepository productImageRepository;
     private final ImageUploadService imageUploadService;
     private final OfferService offerService;
+    private final LikeArticleRepository likeArticleRepository;
+    private final OfferRepository offerRepository;
 
     @Transactional
     public ArticleResponse createArticle(ArticleRequest requestDTO, MultipartFile[] images) throws IOException {
@@ -236,6 +244,11 @@ public class ArticleService {
             throw new ArticleNoPermitException(userId);
         }
 
+        // likeArticle 테이블에서 관련된 행 삭제
+        likeArticleRepository.deleteByArticleId(id);
+        // offer 테이블에서 관련된 행 삭제
+        offerRepository.deleteByArticleId(id);
+
         List<ProductImage> images = productImageRepository.findByArticle(article);
         for (ProductImage productImage : images) {
             imageUploadService.deleteImage(productImage.getImageUrl());
@@ -256,6 +269,11 @@ public class ArticleService {
         offers = offers.stream()
                 .sorted(Comparator.comparing(OfferResponse::getOfferPrice))
                 .collect(Collectors.toList());
+        boolean liked = false;
+        if (SecurityContextHolder.getContext().getAuthentication().getPrincipal() instanceof CustomUserDetails customUserDetails) {
+            Long userId = customUserDetails.getUser().getId();
+            liked = likeArticleRepository.findByArticleIdAndUserId(id, userId).isPresent();
+        }
 
         return new ArticleDetailResponse(
                 article.getId(),
@@ -274,6 +292,8 @@ public class ArticleService {
                 article.getWriter().getProfileImageUrl(),
                 article.getProductImages().get(0).getThumbnailUrl(),
                 imageUrls,
+                liked,
+                article.getLikeCount(),
                 offers
         );
     }
@@ -292,6 +312,39 @@ public class ArticleService {
                         article.getCreatedDate(),
                         article.getWriter().getId()
                 )).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public String likeArticle(Long articleId) {
+        var principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = null;
+        if (principal instanceof CustomUserDetails customUserDetails) {
+            userId = customUserDetails.getUser().getId();
+        }else if(principal instanceof String) {
+            throw new NotLoggedInException("찜하려면 로그인 하세요");
+        }
+
+        userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+
+        Optional<LikeArticle> likeArticles = likeArticleRepository.findByArticleIdAndUserId(articleId, userId);
+        Optional<Article> article = articleRepository.findById(articleId);
+        if(article.isEmpty()) throw new IllegalArgumentException("게시글이 존재하지 않습니다.");
+        if(article.get().getWriter().getId().equals(userId)) throw new ForbiddenException("본인의 게시글는 찜할 수 없습니다.");
+
+        if(likeArticles.isPresent()){
+            likeArticleRepository.deleteByArticleIdAndUserId(articleId, userId);
+            article.get().minusLikeCount();
+            return "찜한 상품을 목록에서 제거했습니다.";
+        }else{
+            LikeArticle likeArticle = LikeArticle.builder()
+                    .user(User.builder().id(userId).build())
+                    .article(Article.builder().id(articleId).build())
+                    .build();
+
+            article.get().plusLikeCount();
+            likeArticleRepository.save(likeArticle);
+            return "상품을 찜목록에 등록했습니다.";
+        }
     }
 
 }

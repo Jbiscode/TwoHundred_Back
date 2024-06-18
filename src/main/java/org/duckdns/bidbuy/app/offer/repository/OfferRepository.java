@@ -18,4 +18,6 @@ public interface OfferRepository extends JpaRepository<Offer, Long> {
     int countBuy(@Param("userId") Long userId);
 
     Offer findByIsSelectedTrueAndOfferer_Id(Long userId);
+
+    void deleteByArticleId(Long articleId);
 }

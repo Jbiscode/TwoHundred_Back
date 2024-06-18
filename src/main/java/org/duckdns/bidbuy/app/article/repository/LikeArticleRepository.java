@@ -19,4 +19,5 @@ public interface LikeArticleRepository extends JpaRepository<LikeArticle, Long> 
 
     Optional<LikeArticle> findByArticleIdAndUserId(Long articleId, Long userId);
 
+    void deleteByArticleId(Long id);
 }

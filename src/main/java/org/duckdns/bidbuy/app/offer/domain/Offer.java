@@ -36,4 +36,8 @@ public class Offer extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "article_id")
     private Article article;
+
+    public void update(boolean isSelected) {
+        this.isSelected = isSelected;
+    }
 }

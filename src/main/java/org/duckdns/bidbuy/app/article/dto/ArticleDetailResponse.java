@@ -32,6 +32,8 @@ public class ArticleDetailResponse {
     private String writerProfileImageUrl;
     private String thumbnailUrl;
     private String[] imageUrls;
+    private boolean liked;
+    private Long likeCount;
 
     private List<OfferResponse> offers;
 
