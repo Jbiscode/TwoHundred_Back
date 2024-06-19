@@ -13,6 +13,17 @@ spring:
       enabled: true
       max-file-size: 10MB
       max-request-size: 10MB
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: tlsehd930@gmail.com # 앱 비밀번호 발급받은 google 계정
+    password: evzrsyvkailgpmnc # 발급받은 앱 비밀번호 (16자리 입니다.) -> 복붙
+    properties:
+      mail:
+        smtp:
+          starttls:
+            enable: true
+          auth: true
 
 
 # entity 이름을 테이블 이름과 동일하게 맞추기 // default = userName -> user_name {설정하면 = userName -> userName}

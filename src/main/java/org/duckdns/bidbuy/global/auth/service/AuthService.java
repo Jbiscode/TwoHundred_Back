@@ -11,6 +11,7 @@ import org.duckdns.bidbuy.app.article.domain.ProductImage;
 import org.duckdns.bidbuy.app.article.service.ImageUploadService;
 import org.duckdns.bidbuy.app.user.domain.User;
 import org.duckdns.bidbuy.app.user.domain.UserRole;
+import org.duckdns.bidbuy.app.user.dto.EmailCheckReq;
 import org.duckdns.bidbuy.app.user.exception.PasswordLengthException;
 import org.duckdns.bidbuy.app.user.repository.UserRepository;
 import org.duckdns.bidbuy.global.auth.domain.SignupRequest;
@@ -72,5 +73,14 @@ public class AuthService {
                                       .profileImageUrl(imgUrl)
                                       .build();
     return userRepository.save(user);
+  }
+
+  public String findUser(EmailCheckReq emailCheckReq) {
+      Optional<User> user =  userRepository.findByEmail(emailCheckReq.getEmail());
+      if(user.isPresent()) {
+        throw new DuplicateIdExistException("이미 존재하는 이메일입니다.");
+      }else{
+        return "notExist";
+      }
   }
 }
