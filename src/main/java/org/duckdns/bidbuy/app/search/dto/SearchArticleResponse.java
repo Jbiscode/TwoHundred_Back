@@ -22,6 +22,7 @@ public class SearchArticleResponse {
     private String thumbnailUrl;
 
     private TradeMethod tradeMethod;
+    private TradeStatus tradeStatus;
 
     private LocalDateTime createdDate;
 
@@ -34,6 +35,7 @@ public class SearchArticleResponse {
         addr2 = article.getAddr2();
         viewCount = article.getViewCount();
         tradeMethod = article.getTradeMethod();
+        tradeStatus = article.getTradeStatus();
         createdDate = article.getCreatedDate();
 
 

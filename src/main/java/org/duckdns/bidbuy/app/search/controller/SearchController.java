@@ -2,10 +2,7 @@ package org.duckdns.bidbuy.app.search.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.duckdns.bidbuy.app.article.domain.Article;
-import org.duckdns.bidbuy.app.article.domain.Category;
-import org.duckdns.bidbuy.app.article.domain.LikeArticle;
-import org.duckdns.bidbuy.app.article.domain.TradeMethod;
+import org.duckdns.bidbuy.app.article.domain.*;
 import org.duckdns.bidbuy.app.search.dto.LikeArticleResponse;
 import org.duckdns.bidbuy.app.search.dto.SearchArticleResponse;
 import org.duckdns.bidbuy.app.search.dto.SearchResponse;
@@ -35,18 +32,19 @@ public class SearchController {
     public ResponseEntity<ApiResponse<SearchResponse>> search(@RequestParam(required = false) String content,
                                                     @RequestParam(required = false) Category category,
                                                     @RequestParam(required = false) TradeMethod tradeMethod,
+                                                    @RequestParam(required = false) TradeStatus tradeStatus,
                                                     @RequestParam(required = false) String orderBy,
                                                     @RequestParam int page,
                                                     @RequestParam int size) {
 
         //검색 게시글
-        List<Article> search = searchService.search(category, tradeMethod, content, orderBy, page, size);
+        List<Article> search = searchService.search(category, tradeMethod, tradeStatus, content, orderBy, page, size);
         List<SearchArticleResponse> searchResult = search.stream()
                 .map(s -> new SearchArticleResponse(s))
                 .collect(toList());
 
         //게시글 총 수
-        Long totalCount = searchService.totalCount(category, tradeMethod, content);
+        Long totalCount = searchService.totalCount(category, tradeMethod, tradeStatus, content);
 
         //검색된 게시글에서 좋아요
         List<LikeArticle> likeArticles = searchService.findLikeArticles(category, tradeMethod, content);

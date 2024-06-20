@@ -4,10 +4,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
-import org.duckdns.bidbuy.app.article.domain.Article;
-import org.duckdns.bidbuy.app.article.domain.Category;
-import org.duckdns.bidbuy.app.article.domain.LikeArticle;
-import org.duckdns.bidbuy.app.article.domain.TradeMethod;
+import org.duckdns.bidbuy.app.article.domain.*;
 import org.duckdns.bidbuy.app.user.domain.User;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +19,7 @@ public class SearchRepository {
     private final EntityManager em;
 
     @Transactional(readOnly = true)
-    public List<Article> search(Category category, TradeMethod tradeMethod, String content, String orderBy, int page, int size) {
+    public List<Article> search(Category category, TradeMethod tradeMethod, TradeStatus tradeStatus, String content, String orderBy, int page, int size) {
         em.flush();
         em.clear();
 
@@ -40,6 +37,11 @@ public class SearchRepository {
         //거래 방식
         if (tradeMethod != null) {
             predicates.add(cb.equal(article.get("tradeMethod"), tradeMethod));
+        }
+
+        //거래 상태
+        if (tradeMethod != null) {
+            predicates.add(cb.equal(article.get("tradeStatus"), tradeStatus));
         }
 
         // 검색 내용
@@ -78,7 +80,7 @@ public class SearchRepository {
     }
 
     @Transactional(readOnly = true)
-    public long totalCount(Category category, TradeMethod tradeMethod, String content) {
+    public long totalCount(Category category, TradeMethod tradeMethod, TradeStatus tradeStatus, String content) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Long> cq = cb.createQuery(Long.class);
         Root<Article> article = cq.from(Article.class);
@@ -93,6 +95,11 @@ public class SearchRepository {
         // 거래 방식
         if (tradeMethod != null) {
             predicates.add(cb.equal(article.get("tradeMethod"), tradeMethod));
+        }
+
+        //거래 상태
+        if (tradeMethod != null) {
+            predicates.add(cb.equal(article.get("tradeStatus"), tradeStatus));
         }
 
         // 검색 내용
