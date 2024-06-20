@@ -85,4 +85,8 @@ public class Article extends BaseEntity {
     public void minusLikeCount(){
         this.likeCount--;
     }
+
+    public void plusViewCount() {
+        this.viewCount++;
+    }
 }

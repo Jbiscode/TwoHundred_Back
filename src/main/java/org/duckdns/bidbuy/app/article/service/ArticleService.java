@@ -347,4 +347,9 @@ public class ArticleService {
         }
     }
 
+    @Transactional
+    public void plusViewCount(Long articleId) {
+        Article article = articleRepository.findById(articleId).orElseThrow(() -> new ArticleNotExistException(articleId));
+        article.plusViewCount();
+    }
 }
