@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.duckdns.bidbuy.app.article.domain.Article;
+import org.duckdns.bidbuy.app.review.dto.ReviewRequest;
 import org.duckdns.bidbuy.app.user.domain.User;
 import org.duckdns.bidbuy.global.common.entity.BaseEntity;
 
@@ -44,5 +45,8 @@ public class Review extends BaseEntity {
     @JoinColumn(name = "article_id")
     private Article article;
 
-
+    public void updateReview(ReviewRequest reviewRequest) {
+        this.content = reviewRequest.getReviewContent();
+        this.score = reviewRequest.getScore();
+    }
 }

@@ -25,7 +25,16 @@ public interface OfferRepository extends JpaRepository<Offer, Long> {
             """)
     int countBuy(@Param("userId") Long userId);
 
-    Offer findByIsSelectedTrueAndOfferer_Id(Long userId);
+
+    @Query("""
+        SELECT o FROM Offer o
+        JOIN Article a ON o.article.id = a.id
+        WHERE o.offerer.id = :userId
+        AND o.article.id = :articleId
+        AND o.isSelected = true
+        AND a.tradeStatus = 'SOLD_OUT'
+    """)
+    Offer findByIsSelectedTrueAndOfferer_Id(Long userId, Long articleId);
 
     void deleteByArticleId(Long articleId);
 }

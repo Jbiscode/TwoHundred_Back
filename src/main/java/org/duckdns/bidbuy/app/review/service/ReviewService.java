@@ -1,6 +1,8 @@
 package org.duckdns.bidbuy.app.review.service;
 
+import com.amazonaws.services.kms.model.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.duckdns.bidbuy.app.article.domain.Article;
 import org.duckdns.bidbuy.app.article.domain.TradeStatus;
 import org.duckdns.bidbuy.app.article.repository.ArticleRepository;
@@ -10,13 +12,17 @@ import org.duckdns.bidbuy.app.offer.repository.OfferRepository;
 import org.duckdns.bidbuy.app.review.domain.Review;
 import org.duckdns.bidbuy.app.review.dto.ReviewRequest;
 import org.duckdns.bidbuy.app.review.dto.ReviewResponse;
+import org.duckdns.bidbuy.app.review.exception.ReviewDeleteFailException;
 import org.duckdns.bidbuy.app.review.exception.ReviewDuplicateException;
+import org.duckdns.bidbuy.app.review.exception.ReviewNotFoundException;
 import org.duckdns.bidbuy.app.review.repository.ReviewRepository;
 import org.duckdns.bidbuy.app.user.domain.User;
 import org.duckdns.bidbuy.app.user.dto.MySalesResponse;
 import org.duckdns.bidbuy.app.user.dto.PageResponseDTO;
 import org.duckdns.bidbuy.app.user.repository.UserRepository;
 import org.duckdns.bidbuy.global.auth.domain.CustomUserDetails;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,7 +36,9 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class ReviewService {
+
 
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
@@ -41,19 +49,16 @@ public class ReviewService {
     public String createReview(Long articleId, ReviewRequest reviewRequest) {
         CustomUserDetails principal = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = principal.getUser().getId();
-
         // offer에서 isSelected = true, offerer_id가 userId와 일치하지 않은경우 => 예외
-        Offer offer = offerRepository.findByIsSelectedTrueAndOfferer_Id(userId);
+        Offer offer = offerRepository.findByIsSelectedTrueAndOfferer_Id(userId, articleId);
         if(offer == null) throw new OfferNotFoundException("제안이 없거나 제안수락되지 않았습니다.");
 
         // 이미 리뷰가 있는경우 예외
         Review existReview = reviewRepository.findByArticleId(articleId);
         if(existReview != null) throw new ReviewDuplicateException("이미 작성된 리뷰가 존재합니다.");
-
         User reviewer = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
         User reviewee = userRepository.findByArticlesId(articleId).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
         Article article = articleRepository.findById(articleId).orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
-
 
         Review review = Review.builder()
                 .content(reviewRequest.getReviewContent())
@@ -108,6 +113,20 @@ public class ReviewService {
                 .build();
     }
 
+    @Transactional
+    public String updateReview(Long articleId, ReviewRequest reviewRequest) {
+
+        Review review = reviewRepository.findByArticleId(articleId);
+        if(review == null) throw new ReviewNotFoundException("해당 리뷰가 존재하지 않습니다.");
+
+        review.updateReview(reviewRequest);
+        Review savedReview = reviewRepository.save(review);
+
+        boolean isReviewUpdated = savedReview != null;
+        return isReviewUpdated ? "리뷰가 수정되었습니다." : "리뷰 수정에 실패했습니다.";
+
+    }
+
     private ReviewResponse createResponse(Object[] reviews) {
         Long reviewId = (Long) reviews[0];
         String content = (String) reviews[1];
@@ -125,6 +144,23 @@ public class ReviewService {
         return new ReviewResponse(reviewId, articleId, articleTitle, reviewerName,revieweeName,reviewerLevel,revieweeLevel,content,timeAgo,score);
     }
 
+    @Transactional
+    public String deleteReview(Long articleId) {
+        Review review = reviewRepository.findByArticleId(articleId);
+        if(review == null) throw new ReviewNotFoundException("해당 리뷰가 존재하지 않습니다.");
+
+        Long reviewId = review.getId();
+        reviewRepository.delete(review);
+
+        Review deletedReview = reviewRepository.findById(reviewId).orElse(null);
+        if(deletedReview != null) {
+            throw new ReviewDeleteFailException("리뷰 삭제에 실패했습니다.");
+        }
+
+        return "리뷰를 삭제했습니다.";
+
+    }
+
     // 현재 시간과의 차이 계산
     private String getTimeAgo(LocalDateTime createdDate) {
         Duration duration = Duration.between(createdDate, LocalDateTime.now());
@@ -140,6 +176,7 @@ public class ReviewService {
             return (int) (seconds / 86400) + "일 전";
         }
     }
+
 
 
 }
