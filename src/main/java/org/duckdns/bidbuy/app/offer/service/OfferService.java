@@ -53,6 +53,7 @@ public class OfferService {
         return new OfferResponse(
                 offer.getId(),
                 offer.getArticle().getId(),
+                offer.getOfferer().getId(),
                 offer.getOfferer().getUsername(),
                 offer.getOfferer().getAddr1(),
                 offer.getOfferer().getAddr2(),
@@ -69,6 +70,7 @@ public class OfferService {
         return offers.stream().map(offer -> new OfferResponse(
                 offer.getId(),
                 offer.getArticle().getId(),
+                offer.getOfferer().getId(),
                 offer.getOfferer().getUsername(),
                 offer.getOfferer().getAddr1(),
                 offer.getOfferer().getAddr2(),

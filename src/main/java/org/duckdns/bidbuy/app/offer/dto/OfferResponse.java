@@ -13,6 +13,7 @@ public class OfferResponse {
 
     private Long id;
     private Long articleId;
+    private Long offererId;
     private String offererUsername;
     private String offererAddr1;
     private String offererAddr2;
