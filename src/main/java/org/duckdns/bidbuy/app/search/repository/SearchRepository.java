@@ -40,7 +40,7 @@ public class SearchRepository {
         }
 
         //거래 상태
-        if (tradeMethod != null) {
+        if (tradeStatus != null) {
             predicates.add(cb.equal(article.get("tradeStatus"), tradeStatus));
         }
 
@@ -98,7 +98,7 @@ public class SearchRepository {
         }
 
         //거래 상태
-        if (tradeMethod != null) {
+        if (tradeStatus != null) {
             predicates.add(cb.equal(article.get("tradeStatus"), tradeStatus));
         }
 
