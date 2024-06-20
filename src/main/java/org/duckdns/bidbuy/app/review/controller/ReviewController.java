@@ -39,4 +39,23 @@ public class ReviewController {
          return ResponseEntity.ok(new ApiResponse<>("200", "리뷰 내용을 불러오는데 성공했습니다.", reviewResponse));
     }
 
+    @Operation(summary = "리뷰 수정하기 API", description = "해당 게시글의 리뷰 수정")
+    @PutMapping(value = "/{articleId}")
+    public ResponseEntity<ApiResponse<?>> updateReviews(
+            @PathVariable Long articleId,
+            @RequestBody ReviewRequest reviewRequest) {
+        String result = reviewService.updateReview(articleId, reviewRequest);
+
+        return ResponseEntity.ok(new ApiResponse<>("200", result, null));
+    }
+
+    @Operation(summary = "리뷰 삭제하기 API", description = "해당 게시글의 리뷰 삭제")
+    @DeleteMapping(value = "/{articleId}")
+    public ResponseEntity<ApiResponse<?>> deleteReviews(
+            @PathVariable Long articleId) {
+        String result = reviewService.deleteReview(articleId);
+
+        return ResponseEntity.ok(new ApiResponse<>("200", result, null));
+    }
+
 }

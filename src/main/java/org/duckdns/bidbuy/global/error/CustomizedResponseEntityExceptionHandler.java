@@ -8,7 +8,9 @@ import org.duckdns.bidbuy.app.article.exception.LikeArticleNotFoundException;
 import org.duckdns.bidbuy.app.article.exception.WriterNotFoundException;
 import org.duckdns.bidbuy.app.offer.exception.OfferNotFoundException;
 import org.duckdns.bidbuy.app.offer.exception.OffererNotFoundException;
+import org.duckdns.bidbuy.app.review.exception.ReviewDeleteFailException;
 import org.duckdns.bidbuy.app.review.exception.ReviewDuplicateException;
+import org.duckdns.bidbuy.app.review.exception.ReviewNotFoundException;
 import org.duckdns.bidbuy.app.user.exception.ForbiddenException;
 import org.duckdns.bidbuy.app.user.exception.NotLoggedInException;
 import org.duckdns.bidbuy.app.user.exception.PasswordLengthException;
@@ -145,5 +147,21 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
                 new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
 
         return new ResponseEntity<>(exceptionResponse, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(ReviewNotFoundException.class)
+    public final ResponseEntity<Object> reviewNotFoundException(Exception ex, WebRequest request) {
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ReviewDeleteFailException.class)
+    public final ResponseEntity<Object> reviewDeleteFailException(Exception ex, WebRequest request) {
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.CONFLICT);
     }
 }
