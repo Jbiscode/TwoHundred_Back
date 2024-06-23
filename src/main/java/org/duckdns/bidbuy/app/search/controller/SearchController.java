@@ -99,18 +99,33 @@ public class SearchController {
         return ResponseEntity.ok(response);
     }
 
-//    @GetMapping("/")
-//    public ResponseEntity<ApiResponse<List<UserResponse>>> findUser(@RequestParam(required = false) Long id) {
-//        List<UserResponse> result = new ArrayList<>();
-//
-//        if (id != null) {
-//            List<User> users = searchService.findUser(id);
-//            result = users.stream()
-//                    .map(u -> new UserResponse(u.getId(), u.getAddr1(), u.getAddr2()))
-//                    .collect(toList());
-//        }
-//        ApiResponse<List<UserResponse>> response = new ApiResponse<>("200", "유저 정보 조회 완료", result);
-//        return ResponseEntity.ok(response);
-//    }
+    //게시글 총 수
+    @GetMapping("/total")
+    public ResponseEntity<ApiResponse<Long>> totalCount(@RequestParam(required = false) String content,
+                                                              @RequestParam(required = false) Category category,
+                                                              @RequestParam(required = false) TradeMethod tradeMethod,
+                                                              @RequestParam(required = false) TradeStatus tradeStatus) {
+
+        Long totalCount = searchService.totalCount(category, tradeMethod, tradeStatus, content);
+        ApiResponse<Long> response = new ApiResponse<>("200", "검색결과 페이지 조회 완료", totalCount);
+        return ResponseEntity.ok(response);
+    }
+
+    //내 주변 게시글 총 수
+    @GetMapping("/myTotal")
+    public ResponseEntity<ApiResponse<Long>> myLocationtotalCount(@RequestParam(required = false) Long id,
+                                                        @RequestParam(required = false) Category category,
+                                                        @RequestParam(required = false) TradeMethod tradeMethod,
+                                                        @RequestParam(required = false) TradeStatus tradeStatus) {
+
+        List<User> user = searchService.findUserAddress(id);
+        List<UserResponse> address = user.stream()
+                .map(u -> new UserResponse((u)))
+                .collect(toList());
+
+        Long totalCount = searchService.myLocationtotalCount(category, tradeMethod, tradeStatus, address);
+        ApiResponse<Long> response = new ApiResponse<>("200", "검색결과 페이지 조회 완료", totalCount);
+        return ResponseEntity.ok(response);
+    }
 
 }
