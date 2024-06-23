@@ -46,7 +46,7 @@ public class RefreshTokenController {
             for (Cookie cookie : cookies) {
                 if (cookie.getName().equals("refresh")) {
                     refreshToken = cookie.getValue();
-                    log.info("refreshToken: {}", refreshToken);
+                    log.info("refreshToken?: {}", refreshToken);
                 }
             }
         }
@@ -77,6 +77,7 @@ public class RefreshTokenController {
 
         //DB에 저장되어 있는지 확인
         Boolean isExist = refreshTokenRepository.existsByRefreshToken(refreshToken);
+        log.info("isExist 존재?: {}", isExist);
         if (!isExist) {
             //로그아웃 진행
 
@@ -100,16 +101,16 @@ public class RefreshTokenController {
 
         //make new JWT
         String newAccess = jwtUtil.createJwt("access", userId, username, role, 60*60*1000L); // 일단 1시간
-        String newRefreshToken = jwtUtil.createJwt("refresh", userId, username, role, 86400000L);
+//        String newRefreshToken = jwtUtil.createJwt("refresh", userId, username, role, 86400000L);
 
         //Refresh 토큰 저장 DB에 기존의 Refresh 토큰 삭제 후 새 Refresh 토큰 저장
-        refreshTokenRepository.deleteByRefreshToken(refreshToken);
-        addRefreshEntity(userId, username, newRefreshToken, 86400000L);
+//        refreshTokenRepository.deleteByRefreshToken(refreshToken);
+//        addRefreshEntity(userId, username, newRefreshToken, 86400000L);
 
         //response
         response.setHeader("Authorization", "Bearer " + newAccess);
 //        response.addCookie(createCookie("Authorization", newAccess, 600000L));
-        response.addCookie(createCookie("refresh", newRefreshToken, 86400000L));
+//        response.addCookie(createCookie("refresh", newRefreshToken, 86400000L));
 
         System.out.println("토큰 재발급 성공");
         return ResponseEntity.ok(new ApiResponse<>("200", "토큰 재발급 성공", null));
