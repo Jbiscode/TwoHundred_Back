@@ -1,16 +1,15 @@
 package org.duckdns.bidbuy.app.search.dto;
 
 import lombok.Getter;
+import org.duckdns.bidbuy.app.user.domain.User;
 
 @Getter
 public class UserResponse {
-    private Long id;
     private String addr1;
     private String addr2;
 
-    public UserResponse(Long id, String addr1, String addr2) {
-        this.id = id;
-        this.addr1 = addr1;
-        this.addr2 = addr2;
+    public UserResponse(User user) {
+        addr1 = user.getAddr1();
+        addr2 = user.getAddr2();
     }
 }
