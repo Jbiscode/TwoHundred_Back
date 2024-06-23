@@ -6,6 +6,7 @@ import org.duckdns.bidbuy.app.article.exception.ArticleNoPermitException;
 import org.duckdns.bidbuy.app.article.exception.ArticleNotExistException;
 import org.duckdns.bidbuy.app.article.exception.LikeArticleNotFoundException;
 import org.duckdns.bidbuy.app.article.exception.WriterNotFoundException;
+import org.duckdns.bidbuy.app.offer.exception.OfferExceedException;
 import org.duckdns.bidbuy.app.offer.exception.OfferNotFoundException;
 import org.duckdns.bidbuy.app.offer.exception.OffererNotFoundException;
 import org.duckdns.bidbuy.app.review.exception.ReviewDeleteFailException;
@@ -159,6 +160,14 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
 
     @ExceptionHandler(ReviewDeleteFailException.class)
     public final ResponseEntity<Object> reviewDeleteFailException(Exception ex, WebRequest request) {
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(OfferExceedException.class)
+    public final ResponseEntity<Object> offerExceedException(Exception ex, WebRequest request) {
         ExceptionResponse exceptionResponse =
                 new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
 

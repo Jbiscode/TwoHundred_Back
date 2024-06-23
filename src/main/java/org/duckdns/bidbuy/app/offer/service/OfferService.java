@@ -9,6 +9,7 @@ import org.duckdns.bidbuy.app.offer.domain.Offer;
 import org.duckdns.bidbuy.app.offer.dto.OfferAcceptResponse;
 import org.duckdns.bidbuy.app.offer.dto.OfferRequest;
 import org.duckdns.bidbuy.app.offer.dto.OfferResponse;
+import org.duckdns.bidbuy.app.offer.exception.OfferExceedException;
 import org.duckdns.bidbuy.app.offer.exception.OffererNotFoundException;
 import org.duckdns.bidbuy.app.offer.repository.OfferRepository;
 import org.duckdns.bidbuy.app.user.domain.User;
@@ -38,6 +39,11 @@ public class OfferService {
 
         User offerer = userRepository.findById(offererId).orElseThrow(() -> new OffererNotFoundException(offererId));
         Article article = articleRepository.findById(articleId).orElseThrow(() -> new ArticleNotExistException(articleId));
+
+        //게시글의 가격보다 높은 가격에는 제안할 수 없음
+        if (requestDTO.getPrice() > article.getPrice()) {
+            throw new OfferExceedException(article.getPrice());
+        }
 
         Offer offer = Offer.builder()
                 .price(requestDTO.getPrice())
