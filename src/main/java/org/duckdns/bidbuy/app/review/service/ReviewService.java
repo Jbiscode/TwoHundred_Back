@@ -32,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -71,6 +72,13 @@ public class ReviewService {
                 .build();
 
         Review savedReview =  reviewRepository.save(review);
+
+
+        Optional<User> userOptional = userRepository.findById(reviewee.getId());
+        if(userOptional.isPresent()) {
+            User user = userOptional.get();
+            user.updateScore(savedReview.getScore());
+        }
 
         boolean isReviewCreated = savedReview != null;
         String message = isReviewCreated ? "리뷰 작성에 성공했습니다." : "리뷰 작성에 실패했습니다.";
@@ -118,9 +126,21 @@ public class ReviewService {
 
         Review review = reviewRepository.findByArticleId(articleId);
         if(review == null) throw new ReviewNotFoundException("해당 리뷰가 존재하지 않습니다.");
+        User reviewee = userRepository.findByArticlesId(articleId).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 
         review.updateReview(reviewRequest);
         Review savedReview = reviewRepository.save(review);
+
+        int score = review.getScore();
+        int updatedScore = reviewRequest.getScore();
+        if(score != updatedScore){
+            Optional<User> userOptional = userRepository.findById(reviewee.getId());
+            if(userOptional.isPresent()) {
+                User user = userOptional.get();
+                user.updateScore(savedReview.getScore());
+            }
+        }
+
 
         boolean isReviewUpdated = savedReview != null;
         return isReviewUpdated ? "리뷰가 수정되었습니다." : "리뷰 수정에 실패했습니다.";
@@ -135,13 +155,15 @@ public class ReviewService {
         String articleTitle = (String) reviews[4];
         String reviewerName = (String) reviews[5];
         Integer reviewerLevel = (Integer) reviews[6];
-        String revieweeName = (String) reviews[7];
-        Integer revieweeLevel = (Integer) reviews[8];
-        Integer score = reviews.length > 9 ? (Integer) reviews[9] :  null;
+        Long reviewerId = (long) reviews[7];
+        String revieweeName = (String) reviews[8];
+        Integer revieweeLevel = (Integer) reviews[9];
+        Long revieweeId = (long) reviews[10];
+        Integer score = reviews.length > 11 ? (Integer) reviews[11] :  null;
 
         String timeAgo = getTimeAgo(createdDate);
 
-        return new ReviewResponse(reviewId, articleId, articleTitle, reviewerName,revieweeName,reviewerLevel,revieweeLevel,content,timeAgo,score);
+        return new ReviewResponse(reviewId, articleId, articleTitle, reviewerName,revieweeName,reviewerLevel,revieweeLevel,reviewerId, revieweeId,content,timeAgo,score);
     }
 
     @Transactional

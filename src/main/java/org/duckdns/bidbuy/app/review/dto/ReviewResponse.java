@@ -18,6 +18,8 @@ public class ReviewResponse {
     private String revieweeName; // review
     private Integer reviewerLevel; // user
     private Integer revieweeLevel; // user
+    private Long reviewerId;
+    private Long revieweeId;
 
     private String content; // review
     private String timeAgo; // review
