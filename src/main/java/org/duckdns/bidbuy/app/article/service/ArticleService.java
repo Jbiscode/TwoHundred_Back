@@ -1,6 +1,7 @@
 package org.duckdns.bidbuy.app.article.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.duckdns.bidbuy.app.article.domain.Article;
 import org.duckdns.bidbuy.app.article.domain.LikeArticle;
 import org.duckdns.bidbuy.app.article.domain.ProductImage;
@@ -14,6 +15,7 @@ import org.duckdns.bidbuy.app.article.exception.WriterNotFoundException;
 import org.duckdns.bidbuy.app.article.repository.ArticleRepository;
 import org.duckdns.bidbuy.app.article.repository.LikeArticleRepository;
 import org.duckdns.bidbuy.app.article.repository.ProductImageRepository;
+import org.duckdns.bidbuy.app.chat.repository.ChatRoomRepository;
 import org.duckdns.bidbuy.app.offer.dto.OfferResponse;
 import org.duckdns.bidbuy.app.offer.repository.OfferRepository;
 import org.duckdns.bidbuy.app.offer.service.OfferService;
@@ -35,6 +37,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -47,6 +50,7 @@ public class ArticleService {
     private final OfferService offerService;
     private final LikeArticleRepository likeArticleRepository;
     private final OfferRepository offerRepository;
+    private final ChatRoomRepository chatRoomRepository;
 
     @Transactional
     public ArticleResponse createArticle(ArticleRequest requestDTO, MultipartFile[] images) throws IOException {
@@ -170,72 +174,9 @@ public class ArticleService {
         return ArticleResponse.from(updatedArticle);
     }
 
-//@Transactional
-//public ArticleResponse updateArticle(Long id, ArticleRequest requestDTO, MultipartFile[] images) throws IOException {
-//    CustomUserDetails principal = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-//    Long userId = principal.getUser().getId();
-//
-//    Article article = articleRepository.findById(id).orElseThrow(() -> new ArticleNotExistException(id));
-//
-//    if(!article.getWriter().getId().equals(userId)) {
-//        throw new ArticleNoPermitException(userId);
-//    }
-//
-//    // 게시글 업데이트
-//    Article updatedArticle = Article.builder()
-//            .id(id)
-//            .title(requestDTO.getTitle() != null ? requestDTO.getTitle() : article.getTitle())
-//            .content(requestDTO.getContent() != null ? requestDTO.getContent() : article.getContent())
-//            .price(requestDTO.getPrice() != null ? requestDTO.getPrice() : article.getPrice())
-//            .quantity(requestDTO.getQuantity() != null ? requestDTO.getQuantity() : article.getQuantity())
-//            .addr1(requestDTO.getAddr1() != null ? requestDTO.getAddr1() : article.getAddr1())
-//            .addr2(requestDTO.getAddr2() != null ? requestDTO.getAddr2() : article.getAddr2())
-//            .category(requestDTO.getCategory() != null ? requestDTO.getCategory() : article.getCategory())
-//            .tradeMethod(requestDTO.getTradeMethod() != null ? requestDTO.getTradeMethod() : article.getTradeMethod())
-//            .tradeStatus(requestDTO.getTradeStatus() != null ? requestDTO.getTradeStatus() : article.getTradeStatus())
-//            .viewCount(article.getViewCount())
-//            .likeCount(article.getLikeCount())
-//            .createdDate(article.getCreatedDate())
-//            .modifiedDate(LocalDateTime.now())
-//            .writer(article.getWriter())
-//            .build();
-//    articleRepository.save(updatedArticle);
-//
-//    // 이미지 변경이 있는 경우에만 기존 이미지 삭제 및 새 이미지 업로드
-//    if (images != null && images.length > 0) {
-//        List<ProductImage> existingImages = productImageRepository.findByArticle(article);
-//        for (ProductImage productImage : existingImages) {
-//            imageUploadService.deleteImage(productImage.getImageUrl());
-//            if (productImage.getThumbnailUrl() != null) {
-//                imageUploadService.deleteImage(productImage.getThumbnailUrl());
-//            }
-//        }
-//        productImageRepository.deleteAll(existingImages);
-//
-//        List<Map<String, String>> imageUrlMaps = imageUploadService.uploadImages(images);
-//        for (int i = 0; i < imageUrlMaps.size(); i++) {
-//            Map<String, String> imageUrlMap = imageUrlMaps.get(i);
-//            ProductImage.ProductImageBuilder productImageBuilder = ProductImage.builder()
-//                    .imageUrl(imageUrlMap.get("original"))
-//                    .article(updatedArticle)
-//                    .createdDate(LocalDateTime.now())
-//                    .modifiedDate(LocalDateTime.now());
-//
-//            // 첫 번째 이미지인 경우에만 썸네일 URL 설정
-//            if (i == 0 && imageUrlMap.containsKey("thumbnail")) {
-//                productImageBuilder.thumbnailUrl(imageUrlMap.get("thumbnail"));
-//            }
-//
-//            ProductImage productImage = productImageBuilder.build();
-//            productImageRepository.save(productImage);
-//        }
-//    }
-//
-//    return ArticleResponse.from(updatedArticle);
-//}
-
     @Transactional
     public void deleteArticle(Long id) {
+        log.info("현재 게시글은 id : " + id + "임");
         Article article = articleRepository.findById(id).orElseThrow(() -> new ArticleNotExistException(id));
         CustomUserDetails principal = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = principal.getUser().getId();
@@ -244,10 +185,16 @@ public class ArticleService {
             throw new ArticleNoPermitException(userId);
         }
 
+        log.info("1번 위치");
         // likeArticle 테이블에서 관련된 행 삭제
         likeArticleRepository.deleteByArticleId(id);
+        log.info("2번 위치");
         // offer 테이블에서 관련된 행 삭제
         offerRepository.deleteByArticleId(id);
+        log.info("3번 위치");
+        chatRoomRepository.deleteByArticleId(article);
+
+
 
         List<ProductImage> images = productImageRepository.findByArticle(article);
         for (ProductImage productImage : images) {
