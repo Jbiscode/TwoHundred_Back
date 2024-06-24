@@ -8,4 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     Boolean existsByArticleIdAndUserId(Article articleId, User userId);
     ChatRoom findByArticleIdAndUserId(Article articleId, User userId);
+
+    void deleteByArticleId(Article articleId);
 }
