@@ -66,6 +66,8 @@ public class AuthService {
                                       .username(userDTO.getUsername())
                                       .password(bCryptPasswordEncoder.encode(userDTO.getPassword()))
                                       .role(UserRole.USER)
+                                      .score(0)
+                                      .offerLevel(1)
                                       .addr1(userDTO.getAddr1())
                                       .addr2(userDTO.getAddr2())
                                       .createdDate(LocalDateTime.now())

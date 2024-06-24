@@ -9,6 +9,7 @@ import org.duckdns.bidbuy.app.offer.domain.Offer;
 import org.duckdns.bidbuy.app.review.domain.Review;
 import org.duckdns.bidbuy.global.common.entity.BaseEntity;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,7 @@ public class User extends BaseEntity {
     private String provider;
     private String providerId;
     private String profileImageUrl;
+    @ColumnDefault("0")
     private Integer score;
 
     @ColumnDefault("1")
@@ -66,6 +68,24 @@ public class User extends BaseEntity {
         this.name = name;
         this.email = email;
     }
+
+    public void updateScore(Integer score) {
+        this.score += score;
+        if (this.score < 10) {
+            this.offerLevel = 1;
+        } else if (this.score < 50) {
+            this.offerLevel = 2;
+        }else if (this.score < 100) {
+            this.offerLevel = 3;
+        }else if (this.score < 150) {
+            this.offerLevel = 4;
+        }else {
+            this.offerLevel = 5;
+        }
+
+    }
+
+
 
 
 }
