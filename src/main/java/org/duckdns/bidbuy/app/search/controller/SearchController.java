@@ -3,10 +3,7 @@ package org.duckdns.bidbuy.app.search.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.duckdns.bidbuy.app.article.domain.*;
-import org.duckdns.bidbuy.app.search.dto.LikeArticleResponse;
-import org.duckdns.bidbuy.app.search.dto.SearchArticleResponse;
-import org.duckdns.bidbuy.app.search.dto.SearchResponse;
-import org.duckdns.bidbuy.app.search.dto.UserResponse;
+import org.duckdns.bidbuy.app.search.dto.*;
 import org.duckdns.bidbuy.app.search.service.SearchService;
 import org.duckdns.bidbuy.app.user.domain.User;
 import org.duckdns.bidbuy.global.common.response.ApiResponse;
@@ -120,10 +117,10 @@ public class SearchController {
 
     //내 주변 게시글 총 수
     @GetMapping("/myTotal")
-    public ResponseEntity<ApiResponse<Long>> myLocationtotalCount(@RequestParam(required = false) Long id,
-                                                        @RequestParam(required = false) Category category,
-                                                        @RequestParam(required = false) TradeMethod tradeMethod,
-                                                        @RequestParam(required = false) TradeStatus tradeStatus) {
+    public ResponseEntity<ApiResponse<MyLocationHeaderResponse>> myLocationtotalCount(@RequestParam(required = false) Long id,
+                                                                                      @RequestParam(required = false) Category category,
+                                                                                      @RequestParam(required = false) TradeMethod tradeMethod,
+                                                                                      @RequestParam(required = false) TradeStatus tradeStatus) {
 
         List<User> user = searchService.findUserAddress(id);
         List<UserResponse> address = user.stream()
@@ -131,7 +128,9 @@ public class SearchController {
                 .collect(toList());
 
         Long totalCount = searchService.myLocationtotalCount(category, tradeMethod, tradeStatus, address);
-        ApiResponse<Long> response = new ApiResponse<>("200", "검색결과 페이지 조회 완료", totalCount);
+
+        MyLocationHeaderResponse result = new MyLocationHeaderResponse(totalCount, address );
+        ApiResponse<MyLocationHeaderResponse> response = new ApiResponse<>("200", "검색결과 페이지 조회 완료", result);
         return ResponseEntity.ok(response);
     }
 
