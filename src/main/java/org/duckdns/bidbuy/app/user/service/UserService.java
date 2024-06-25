@@ -7,26 +7,33 @@ import org.duckdns.bidbuy.app.article.domain.TradeStatus;
 import org.duckdns.bidbuy.app.article.exception.LikeArticleNotFoundException;
 import org.duckdns.bidbuy.app.article.repository.ArticleRepository;
 import org.duckdns.bidbuy.app.article.repository.LikeArticleRepository;
+import org.duckdns.bidbuy.app.article.service.ImageUploadService;
 import org.duckdns.bidbuy.app.offer.repository.OfferRepository;
 import org.duckdns.bidbuy.app.review.repository.ReviewRepository;
 import org.duckdns.bidbuy.app.user.dto.*;
 import org.duckdns.bidbuy.app.user.domain.User;
 import org.duckdns.bidbuy.app.user.exception.ForbiddenException;
 import org.duckdns.bidbuy.app.user.exception.NotLoggedInException;
+import org.duckdns.bidbuy.app.user.exception.PasswordLengthException;
 import org.duckdns.bidbuy.app.user.repository.UserRepository;
 import org.duckdns.bidbuy.global.auth.domain.CustomUserDetails;
+import org.duckdns.bidbuy.global.error.NullInputException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -39,6 +46,8 @@ public class UserService {
     private final LikeArticleRepository likeArticleRepository;
     private final OfferRepository offerRepository;
     private final ReviewRepository reviewRepository;
+    private final ImageUploadService imageUploadService;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
 
     public MyProfileResponse getMyProfile() {
@@ -320,6 +329,58 @@ public class UserService {
     }
 
 
+    public MyInfoResponse getMyInfo() {
+        CustomUserDetails principal = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = principal.getUser().getId();
+        User user = userRepository.findById(userId).get();
 
+        return MyInfoResponse.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .addr1(user.getAddr1())
+                .password("")
+                .addr2(user.getAddr2())
+                .profileImageUrl(user.getProfileImageUrl())
+                .build();
+    }
 
+    @Transactional
+    public String updateUserInfo(MyInfoResponse myInfoResponseDTO, List<MultipartFile> list) throws IOException {
+        CustomUserDetails principal = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = principal.getUser().getId();
+        User user = userRepository.findById(userId).get();
+        log.error("userId = {}",userId);
+        if (myInfoResponseDTO.getEmail() == null || myInfoResponseDTO.getEmail().isEmpty()
+                || myInfoResponseDTO.getPassword() == null || myInfoResponseDTO.getPassword().isEmpty()
+                || myInfoResponseDTO.getUsername() == null || myInfoResponseDTO.getUsername().isEmpty()
+                || myInfoResponseDTO.getAddr1() == null || myInfoResponseDTO.getAddr1().isEmpty()
+                || myInfoResponseDTO.getAddr2() == null || myInfoResponseDTO.getAddr2().isEmpty()) {
+            throw new NullInputException("입력값을 확인해주세요.");
+        }
+
+        if(myInfoResponseDTO.getPassword().length() < 8) {
+            throw new PasswordLengthException("비밀번호의 길이가 짧습니다.");
+        }
+
+        String imgUrl = "";
+        if(list == null) {
+            imgUrl = user.getProfileImageUrl();
+        }else{
+            if(!user.getProfileImageUrl().equals("s_uuid_7adc2b20-82c8-4f14-96f0-f68aa2613ac0")) {
+                imageUploadService.deleteImage(user.getProfileImageUrl());
+            }
+            MultipartFile[] multipartFiles = list.toArray(new MultipartFile[0]);
+            List<Map<String, String>> uploadimageURL = imageUploadService.uploadImages(multipartFiles);
+            for (int i = 0; i < uploadimageURL.size(); i++) {
+                Map<String, String> imageUrlMap = uploadimageURL.get(i);
+                imgUrl = imageUrlMap.get("thumbnail");
+            }
+        }
+
+        user.update(myInfoResponseDTO.getUsername(), myInfoResponseDTO.getAddr1(), myInfoResponseDTO.getAddr2(), bCryptPasswordEncoder.encode(myInfoResponseDTO.getPassword()), imgUrl);
+
+        userRepository.save(user);
+        return "회원정보 수정에 성공했습니다.";
+    }
 }

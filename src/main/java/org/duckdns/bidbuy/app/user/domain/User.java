@@ -7,10 +7,12 @@ import org.duckdns.bidbuy.app.article.domain.Article;
 import org.duckdns.bidbuy.app.article.domain.LikeArticle;
 import org.duckdns.bidbuy.app.offer.domain.Offer;
 import org.duckdns.bidbuy.app.review.domain.Review;
+import org.duckdns.bidbuy.app.user.dto.UserDto;
 import org.duckdns.bidbuy.global.common.entity.BaseEntity;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -67,6 +69,15 @@ public class User extends BaseEntity {
     public void update(String name, String email) {
         this.name = name;
         this.email = email;
+    }
+
+    public void update(String username, String addr1, String addr2, String password, String profileImageUrl) {
+        this.username = username;
+        this.addr1 = addr1;
+        this.addr2 = addr2;
+        this.password = password;
+        this.profileImageUrl = profileImageUrl;
+        this.setModifiedDate(LocalDateTime.now());
     }
 
     public void updateScore(Integer score) {
