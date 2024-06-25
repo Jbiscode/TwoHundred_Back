@@ -26,8 +26,8 @@ public class SearchService {
         return searchRepository.totalCount(category, tradeMethod, tradeStatus, content);
     }
 
-    public List<LikeArticle> findLikeArticles(Category category, TradeMethod tradeMethod, String content) {
-        return searchRepository.findLikeArticles(category, tradeMethod, content);
+    public List<LikeArticle> findLikeArticles(Category category, TradeMethod tradeMethod, String content, Long id) {
+        return searchRepository.findLikeArticles(category, tradeMethod, content, id);
     }
 
     public List<User> findUserAddress(Long id) {
