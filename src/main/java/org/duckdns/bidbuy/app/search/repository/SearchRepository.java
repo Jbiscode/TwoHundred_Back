@@ -202,7 +202,7 @@ public class SearchRepository {
                 predicates.add(cb.equal(article.get("addr1"), addr1));
                 predicates.add(cb.equal(article.get("addr2"), addr2));
             } else if (addr1.endsWith("구")) {
-                predicates.add(cb.equal(article.get("addr2"), addr2));
+                predicates.add(cb.equal(article.get("addr2"), addr1));
             }
         }
 
@@ -254,9 +254,16 @@ public class SearchRepository {
         }
 
         // 주소
-        if (address != null) {
-            predicates.add(cb.equal(article.get("addr1"), address.get(0).getAddr1()));
-            predicates.add(cb.equal(article.get("addr2"), address.get(0).getAddr2()));
+        if (address != null && !address.isEmpty()) {
+            String addr1 = address.get(0).getAddr1();
+            String addr2 = address.get(0).getAddr2();
+
+            if (addr1.endsWith("시") && addr2.endsWith("구")) {
+                predicates.add(cb.equal(article.get("addr1"), addr1));
+                predicates.add(cb.equal(article.get("addr2"), addr2));
+            } else if (addr1.endsWith("구")) {
+                predicates.add(cb.equal(article.get("addr2"), addr1));
+            }
         }
 
         cq.select(cb.count(article)).where(predicates.toArray(new Predicate[0]));
