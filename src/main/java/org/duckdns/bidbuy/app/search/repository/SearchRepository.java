@@ -127,7 +127,7 @@ public class SearchRepository {
         return addresses;
     }
 
-    public List<LikeArticle> findLikeArticles(Category category, TradeMethod tradeMethod, String content) {
+    public List<LikeArticle> findLikeArticles(Category category, TradeMethod tradeMethod, String content, Long id) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<LikeArticle> cq = cb.createQuery(LikeArticle.class);
         Root<LikeArticle> likeArticle = cq.from(LikeArticle.class);
@@ -155,6 +155,11 @@ public class SearchRepository {
             );
             predicates.add(contentPredicate);
         }
+
+        // 해당 아이디의 좋아요 값만 받아오게
+        predicates.add(cb.equal(likeArticle.get("user").get("id"), id));
+
+
 
         cq.where(predicates.toArray(new Predicate[0]));
 

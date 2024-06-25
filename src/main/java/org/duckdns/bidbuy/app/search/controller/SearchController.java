@@ -35,7 +35,8 @@ public class SearchController {
                                                     @RequestParam(required = false) TradeStatus tradeStatus,
                                                     @RequestParam(required = false) String orderBy,
                                                     @RequestParam int page,
-                                                    @RequestParam int size) {
+                                                    @RequestParam int size,
+                                                    @RequestParam(required = false) Long id) {
 
         //검색 게시글
         List<Article> search = searchService.search(category, tradeMethod, tradeStatus, content, orderBy, page, size);
@@ -46,11 +47,17 @@ public class SearchController {
         //게시글 총 수
         Long totalCount = searchService.totalCount(category, tradeMethod, tradeStatus, content);
 
-        //검색된 게시글에서 좋아요
-        List<LikeArticle> likeArticles = searchService.findLikeArticles(category, tradeMethod, content);
-        List<LikeArticleResponse> likeArticleResult = likeArticles.stream()
-                .map(l -> new LikeArticleResponse(l))
-                .collect(toList());
+        // 검색된 게시글에서 좋아요
+        List<LikeArticleResponse> likeArticleResult;
+        if (id != null) {
+            List<LikeArticle> likeArticles = searchService.findLikeArticles(category, tradeMethod, content, id);
+            likeArticleResult = likeArticles.stream()
+                    .map(l -> new LikeArticleResponse(l))
+                    .collect(toList());
+        } else {
+            likeArticleResult = new ArrayList<>();
+        }
+
 
 
 
@@ -86,7 +93,7 @@ public class SearchController {
         Long totalCount = searchService.myLocationtotalCount(category, tradeMethod, tradeStatus, address);
 
         //검색된 게시글에서 좋아요
-        List<LikeArticle> likeArticles = searchService.findLikeArticles(category, tradeMethod, content);
+        List<LikeArticle> likeArticles = searchService.findLikeArticles(category, tradeMethod, content, id);
         List<LikeArticleResponse> likeArticleResult = likeArticles.stream()
                 .map(l -> new LikeArticleResponse(l))
                 .collect(toList());
