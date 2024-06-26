@@ -138,7 +138,7 @@ public class UserController {
             @PageableDefault( page=0, size = 4) Pageable pageable,
             @RequestParam(name = "tradeStatus") TradeStatus tradeStatus,
             @RequestParam(name = "sorting", required = false, defaultValue = "latest") String sorting) {
-        log.error("다른사용자판매상품 컨트롤러1");
+//        log.error("다른사용자판매상품 컨트롤러1");
         // batch
         PageResponseDTO<List<MySalesResponse>> responseDTO = userService.getUserSales(userId,tradeStatus, sorting,pageable);
         ApiResponse<PageResponseDTO<List<MySalesResponse>>> response = new ApiResponse<>("200", "판매중인 상품목록을 불러오는데 성공하였습니다.", responseDTO);

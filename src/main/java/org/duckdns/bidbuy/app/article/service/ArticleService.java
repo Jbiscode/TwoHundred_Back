@@ -176,7 +176,6 @@ public class ArticleService {
 
     @Transactional
     public void deleteArticle(Long id) {
-        log.info("현재 게시글은 id : " + id + "임");
         Article article = articleRepository.findById(id).orElseThrow(() -> new ArticleNotExistException(id));
         CustomUserDetails principal = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = principal.getUser().getId();
@@ -185,13 +184,10 @@ public class ArticleService {
             throw new ArticleNoPermitException(userId);
         }
 
-        log.info("1번 위치");
         // likeArticle 테이블에서 관련된 행 삭제
         likeArticleRepository.deleteByArticleId(id);
-        log.info("2번 위치");
         // offer 테이블에서 관련된 행 삭제
         offerRepository.deleteByArticleId(id);
-        log.info("3번 위치");
         chatRoomRepository.deleteByArticleId(article);
 
 

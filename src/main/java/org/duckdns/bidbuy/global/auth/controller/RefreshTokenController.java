@@ -38,7 +38,6 @@ public class RefreshTokenController {
 
     @GetMapping("/refreshToken")
     public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        log.info("refreshToken 시작");
         //get refresh token
         String refreshToken = null;
         Cookie[] cookies = request.getCookies();
@@ -77,7 +76,6 @@ public class RefreshTokenController {
 
         //DB에 저장되어 있는지 확인
         Boolean isExist = refreshTokenRepository.existsByRefreshToken(refreshToken);
-        log.info("isExist 존재?: {}", isExist);
         if (!isExist) {
             //로그아웃 진행
 

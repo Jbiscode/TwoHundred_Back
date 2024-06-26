@@ -26,7 +26,6 @@ public class ChatRoomController {
 
     @PostMapping("/enter")
     public ResponseEntity<ApiResponse<ChatRoomResponse>> enter(@RequestBody ChatEnterRequest request) {
-        log.info("Entering chat room: {},{}", request.getArticleId(), request.getUserId());
         ChatRoomResponse chatRoomId = chatRoomService.enter(request);
         ApiResponse<ChatRoomResponse> response =new ApiResponse<>("200", "채팅방 PK", chatRoomId);
 

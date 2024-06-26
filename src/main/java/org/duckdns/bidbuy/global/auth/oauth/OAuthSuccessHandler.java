@@ -58,7 +58,6 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         response.setHeader("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization, Set-Cookie, refresh");
         response.setHeader("Access-Control-Expose-Headers", "Authorization, refresh");
-        log.info("Oauth 로그인 성공");
         response.sendRedirect("https://bidbuy.duckdns.org");
     }
 

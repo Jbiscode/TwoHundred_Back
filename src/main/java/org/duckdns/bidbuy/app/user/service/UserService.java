@@ -158,10 +158,8 @@ public class UserService {
 
         try {
             var principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            log.info("Principal: " + principal);
             if (principal instanceof CustomUserDetails customUserDetails) {
                 Long loggedInUserId = customUserDetails.getUser().getId();
-                log.info("로그인 상태.");
                 switch (sorting) {
                     case "latest":
                         articles = articleRepository.findByWriterIdAndTradeStatusUserLoggedIn(userId, loggedInUserId, tradeStatus, pageable);
@@ -176,7 +174,6 @@ public class UserService {
                         articles = articleRepository.findByWriterIdAndTradeStatusUserLoggedIn(userId, loggedInUserId, tradeStatus, pageable);
                 }
             }else if(principal instanceof String){
-                log.info("로그인되지 않았습니다.");
                 switch (sorting) {
                     case "latest":
                         articles =  articleRepository.findByWriterIdAndTradeStatusUser(userId, tradeStatus, pageable);
@@ -295,7 +292,7 @@ public class UserService {
         Page<MySalesResponse> articles;
         switch (sorting) {
             case "latest":
-                log.error("나 맞지?");
+//                log.error("나 맞지?");
                 articles = articleRepository.getOfferedArticlesByUserIdAndIsSelected(userId, pageable);
                 break;
             case "high-price":
@@ -350,7 +347,7 @@ public class UserService {
         CustomUserDetails principal = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = principal.getUser().getId();
         User user = userRepository.findById(userId).get();
-        log.error("userId = {}",userId);
+//        log.error("userId = {}",userId);
         if (myInfoResponseDTO.getEmail() == null || myInfoResponseDTO.getEmail().isEmpty()
                 || myInfoResponseDTO.getPassword() == null || myInfoResponseDTO.getPassword().isEmpty()
                 || myInfoResponseDTO.getUsername() == null || myInfoResponseDTO.getUsername().isEmpty()
